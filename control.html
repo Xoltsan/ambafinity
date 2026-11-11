@@ -1,1764 +1,1466 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AmbaFinity - Pusat Interaksi & TikTok Live Hub</title>
+  
+  <!-- Font Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-dark: #0c0f17;
-      --sidebar-bg: #111625;
-      --card-bg: #161c2e;
-      --card-inner: #0f1422;
-      --card-border: #232d42;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #38bdf8;
-      --primary-hover: #0284c7;
-      --orange: #f97316;
-      --orange-bg: rgba(249, 115, 22, 0.12);
-      --orange-border: rgba(249, 115, 22, 0.35);
-      --green: #10b981;
-      --green-bg: rgba(16, 185, 129, 0.15);
-      --danger: #ef4444;
-      --danger-bg: rgba(239, 68, 68, 0.15);
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            background: '#090d16',
+            foreground: '#f8fafc',
+            card: {
+              DEFAULT: '#0f172a',
+              foreground: '#f8fafc',
+              inner: '#131e36',
+              border: '#1e293b'
+            },
+            primary: {
+              DEFAULT: '#38bdf8',
+              foreground: '#090d16',
+              hover: '#0284c7'
+            },
+            secondary: {
+              DEFAULT: '#1e293b',
+              foreground: '#f8fafc'
+            },
+            muted: {
+              DEFAULT: '#1e293b',
+              foreground: '#94a3b8'
+            },
+            accent: {
+              DEFAULT: '#f97316',
+              foreground: '#ffffff'
+            },
+            destructive: {
+              DEFAULT: '#f43f5e',
+              foreground: '#ffffff'
+            },
+            success: {
+              DEFAULT: '#10b981',
+              foreground: '#ffffff'
+            },
+            border: '#202b40'
+          }
+        }
+      }
     }
+  </script>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  <!-- React 18 & ReactDOM 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel Standalone for JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* Base Reset & Accessibility Focus Ring */
+    * {
+      box-sizing: border-box;
+    }
     body {
-      background: var(--bg-dark);
-      color: var(--text-main);
+      background-color: #090d16;
+      color: #f8fafc;
       font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
-      display: flex;
+      overflow-x: hidden;
     }
-
-    /* ============================================================
-       SIDEBAR NAV (PERSIS SCREENSHOT INDOFINITY)
-       ============================================================ */
-    .sidebar {
-      width: 250px;
-      background: var(--sidebar-bg);
-      border-right: 1px solid var(--card-border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      min-height: 100vh;
+    :focus-visible {
+      outline: 2px solid #38bdf8;
+      outline-offset: 2px;
     }
-
-    .brand-box {
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-
-    .brand-logo {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, #f97316, #ec4899);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
-    }
-
-    .brand-title {
-      font-size: 19px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-    }
-
-    .preset-box {
-      padding: 14px 20px;
-    }
-
-    .preset-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .preset-select {
-      width: 100%;
-      background: #0b0f19;
-      border: 1px solid var(--card-border);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      outline: none;
-    }
-
-    .nav-section {
-      padding: 8px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .nav-section-title {
-      font-size: 11px;
-      font-weight: 800;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      padding: 10px 12px 4px 12px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-main);
-    }
-
-    .nav-item.active {
-      background: var(--orange-bg);
-      border: 1px solid var(--orange-border);
-      color: #fb923c;
-    }
-
-    .nav-item svg, .nav-item span.icon {
-      font-size: 16px;
-      width: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* ============================================================
-       MAIN CONTENT WRAPPER
-       ============================================================ */
-    .main-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      overflow-y: auto;
-    }
-
-    /* Top Bar */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 28px;
-      background: var(--sidebar-bg);
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    .tiktok-status-pill {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #0b0f19;
-      border: 1px solid var(--card-border);
-      padding: 6px 14px;
-      border-radius: 99px;
-    }
-
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #ef4444;
-    }
-    .status-dot.connected { background: #10b981; box-shadow: 0 0 8px #10b981; }
-
-    .btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 12.5px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-primary { background: var(--primary); color: #0b0f19; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-orange { background: var(--orange); color: white; }
-    .btn-orange:hover { background: #ea580c; }
-    .btn-green { background: #10b981; color: white; }
-    .btn-green:hover { background: #059669; }
-    .btn-outline { background: #1e293b; color: var(--text-main); border: 1px solid var(--card-border); }
-    .btn-outline:hover { background: #334155; }
-    .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
-    .btn-danger:hover { background: var(--danger); color: white; }
-
-    /* Page Container */
-    .page-content {
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* Page Header */
-    .page-header h1 {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .page-header p {
-      font-size: 13.5px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      line-height: 1.5;
-    }
-
-    /* Orange Notice Banner (Overlay Alert) */
-    .notice-banner {
-      background: var(--card-bg);
-      border: 1px solid var(--orange-border);
-      border-left: 4px solid var(--orange);
-      border-radius: 14px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .notice-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .notice-icon {
-      font-size: 26px;
-      color: var(--orange);
-    }
-
-    .notice-text h4 {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fb923c;
-    }
-
-    .notice-text p {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* Master Switches Bar (Sakelar Pusat Interaksi) */
-    .master-switches-bar {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 12px 18px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .switch-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--card-inner);
-      border: 1px solid var(--card-border);
-      padding: 6px 12px;
-      border-radius: 99px;
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #cbd5e1;
-    }
-
-    /* Toggle Switch */
-    .toggle {
-      position: relative;
-      display: inline-block;
-      width: 34px;
-      height: 18px;
-    }
-
-    .toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background-color: #334155;
-      transition: .3s;
-      border-radius: 99px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 14px;
-      width: 14px;
-      left: 2px;
-      bottom: 2px;
-      background-color: white;
-      transition: .3s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: #38bdf8;
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(16px);
-    }
-
-    /* Action Control Bar */
-    .control-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .tabs-group {
-      display: flex;
-      gap: 6px;
-      background: var(--card-bg);
-      padding: 4px;
-      border-radius: 10px;
-      border: 1px solid var(--card-border);
-    }
-
-    .tab-btn {
-      padding: 6px 14px;
-      font-size: 12.5px;
-      font-weight: 700;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .tab-btn.active {
-      background: var(--orange);
-      color: white;
-    }
-
-    .search-box {
-      flex: 1;
-      max-width: 340px;
-      position: relative;
-    }
-
-    .search-input {
-      width: 100%;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 9px 14px 9px 34px;
-      color: white;
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 14px;
-      color: #64748b;
-    }
-
-    /* Cards Grid of Interactions */
-    .interactions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 16px;
-    }
-
-    .interaction-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: all 0.2s ease;
-    }
-
-    .interaction-card:hover {
-      border-color: rgba(56, 189, 248, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .card-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .card-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--card-inner);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .card-title-text {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .badges-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .badge-tag {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: var(--card-inner);
-      border: 1px solid var(--card-border);
-      color: #cbd5e1;
-    }
-
-    .badge-trigger { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
-    .badge-action { background: rgba(249, 115, 22, 0.12); color: #fb923c; border-color: rgba(249, 115, 22, 0.3); }
-
-    .card-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 10px;
-      margin-top: 2px;
-    }
-
-    /* Modal Form */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 99999;
-      padding: 20px;
-    }
-
-    .modal-backdrop.show { display: flex; }
-
-    .modal-card {
-      background: #111625;
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      width: 100%;
-      max-width: 540px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-head h3 { font-size: 18px; font-weight: 800; }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #94a3b8;
-    }
-
-    .input-field {
-      width: 100%;
+    ::-webkit-scrollbar-track {
       background: #090d16;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 9px 12px;
-      color: white;
-      font-size: 13px;
-      outline: none;
-      font-family: inherit;
     }
-
-    .input-field:focus { border-color: var(--primary); }
-
-    /* Views */
-    .tab-view { display: none; }
-    .tab-view.active { display: flex; flex-direction: column; gap: 20px; }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
   </style>
 </head>
-<body>
+<body class="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+  <div id="root"></div>
 
-  <!-- ============================================================
-       SIDEBAR NAV (PERSIS DESAIN INDOFINITY)
-       ============================================================ -->
-  <aside class="sidebar">
-    <div class="brand-box">
-      <div class="brand-logo">⚡</div>
-      <div class="brand-title">AmbaFinity</div>
-    </div>
+  <!-- React Application Source -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
 
-    <div class="preset-box">
-      <div class="preset-label">Preset</div>
-      <select class="preset-select">
-        <option>default</option>
-        <option>gaming-mode</option>
-        <option>chill-stream</option>
-      </select>
-    </div>
+    // ========================================================================
+    // LUCIDE VECTOR ICONS (SVG COMPONENT SET)
+    // ========================================================================
+    const Icon = ({ name, size = 18, className = "" }) => {
+      const icons = {
+        zap: (
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        ),
+        music: (
+          <>
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+          </>
+        ),
+        sliders: (
+          <>
+            <line x1="4" y1="21" x2="4" y2="14" />
+            <line x1="4" y1="10" x2="4" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12" y2="3" />
+            <line x1="20" y1="21" x2="20" y2="16" />
+            <line x1="20" y1="12" x2="20" y2="3" />
+            <line x1="1" y1="14" x2="7" y2="14" />
+            <line x1="9" y1="8" x2="15" y2="8" />
+            <line x1="17" y1="16" x2="23" y2="16" />
+          </>
+        ),
+        activity: (
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        ),
+        flask: (
+          <>
+            <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
+            <line x1="8.5" y1="2" x2="15.5" y2="2" />
+            <path d="M8.5 14h7" />
+          </>
+        ),
+        copy: (
+          <>
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </>
+        ),
+        externalLink: (
+          <>
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </>
+        ),
+        plus: (
+          <>
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </>
+        ),
+        trash: (
+          <>
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </>
+        ),
+        edit: (
+          <>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </>
+        ),
+        play: (
+          <polygon points="5 3 19 12 5 21 5 3" />
+        ),
+        skipForward: (
+          <>
+            <polygon points="5 4 15 12 5 20 5 4" />
+            <line x1="19" y1="5" x2="19" y2="19" />
+          </>
+        ),
+        video: (
+          <>
+            <polygon points="23 7 16 12 23 17 23 7" />
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+          </>
+        ),
+        search: (
+          <>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </>
+        ),
+        menu: (
+          <>
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </>
+        ),
+        x: (
+          <>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </>
+        ),
+        check: (
+          <polyline points="20 6 9 17 4 12" />
+        ),
+        heart: (
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        ),
+        gift: (
+          <>
+            <polyline points="20 12 20 22 4 22 4 12" />
+            <rect x="2" y="7" width="20" height="5" />
+            <line x1="12" y1="22" x2="12" y2="7" />
+            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+          </>
+        ),
+        tv: (
+          <>
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
+            <polyline points="17 2 12 7 7 2" />
+          </>
+        ),
+        upload: (
+          <>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </>
+        ),
+        alertCircle: (
+          <>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </>
+        )
+      };
 
-    <div class="nav-section">
-      <div class="nav-section-title">Selamat Datang</div>
-      <a class="nav-item" href="#pusat-interaksi" onclick="switchNav('pusat-interaksi', event)">
-        <span class="icon">📊</span>
-        <span>Dashboard</span>
-      </a>
-    </div>
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={className}
+          aria-hidden="true"
+        >
+          {icons[name] || icons.zap}
+        </svg>
+      );
+    };
 
-    <div class="nav-section">
-      <div class="nav-section-title">Setup</div>
-      <a class="nav-item active" id="nav-pusat-interaksi" href="#pusat-interaksi" onclick="switchNav('pusat-interaksi', event)">
-        <span class="icon">⚡</span>
-        <span>Pusat Interaksi</span>
-      </a>
-      <a class="nav-item" id="nav-music-hub" href="#music-hub" onclick="switchNav('music-hub', event)">
-        <span class="icon">🎵</span>
-        <span>Music Request & Vinyl</span>
-      </a>
-      <a class="nav-item" id="nav-simulator" href="#simulator" onclick="switchNav('simulator', event)">
-        <span class="icon">🧪</span>
-        <span>Simulator Interaksi</span>
-      </a>
-      <a class="nav-item" id="nav-logs" href="#logs" onclick="switchNav('logs', event)">
-        <span class="icon">📋</span>
-        <span>Log Aktivitas</span>
-      </a>
-    </div>
+    // ========================================================================
+    // ACCESSIBLE RADIX-STYLE SWITCH COMPONENT
+    // ========================================================================
+    const Switch = ({ checked, onChange, label, ariaLabel }) => {
+      return (
+        <button
+          type="button"
+          role="switch"
+          aria-checked={checked}
+          aria-label={ariaLabel || label}
+          onClick={() => onChange(!checked)}
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+            checked ? 'bg-primary' : 'bg-slate-700'
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+              checked ? 'translate-x-5' : 'translate-x-0'
+            }`}
+          />
+        </button>
+      );
+    };
 
-    <div class="nav-section" style="margin-top: auto; padding-bottom: 20px;">
-      <div class="nav-section-title">Tautan OBS</div>
-      <button class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 11.5px;" onclick="copyObsUrl()">
-        📋 Salin Link Overlay
-      </button>
-    </div>
-  </aside>
+    // ========================================================================
+    // TOAST NOTIFICATION COMPONENT
+    // ========================================================================
+    const Toast = ({ message, type = 'info', onClose }) => {
+      useEffect(() => {
+        const timer = setTimeout(onClose, 3500);
+        return () => clearTimeout(timer);
+      }, [onClose]);
 
-  <!-- ============================================================
-       MAIN CONTENT AREA
-       ============================================================ -->
-  <div class="main-wrapper">
-    
-    <!-- Top Bar -->
-    <header class="topbar">
-      <div class="tiktok-status-pill">
-        <div class="status-dot" id="top-dot"></div>
-        <span style="font-size: 13px; font-weight: 700;" id="top-username">@xolt.san</span>
-        <button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;" onclick="promptConnectTikTok()">Hubungkan</button>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <a href="/overlay" target="_blank" class="btn btn-outline" style="font-size: 12px;">📺 Buka Overlay ↗</a>
-        <div style="width: 32px; height: 32px; border-radius: 50%; background: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0b0f19;">X</div>
-      </div>
-    </header>
-
-    <div class="page-content">
-
-      <!-- ============================================================
-           TAB 1: PUSAT INTERAKSI (PERSIS INDOFINITY SCREENSHOT)
-           ============================================================ -->
-      <div class="tab-view active" id="view-pusat-interaksi">
-        
-        <div class="page-header">
-          <h1>Pusat Interaksi</h1>
-          <p>Pusat Interaksi memungkinkan Anda mengelola dan merespons aktivitas pengguna dengan mudah, mulai dari event seperti like dan gift hingga aksi kustom seperti memainkan suara, menampilkan alert, atau keystroke otomatis.</p>
+      return (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-xl backdrop-blur-md animate-fade-in">
+          <Icon name={type === 'success' ? 'check' : 'alertCircle'} size={18} className={type === 'success' ? 'text-success' : 'text-primary'} />
+          <span className="text-sm font-medium text-foreground">{message}</span>
+          <button
+            onClick={onClose}
+            aria-label="Tutup notifikasi"
+            className="ml-2 text-muted-foreground hover:text-foreground cursor-pointer"
+          >
+            <Icon name="x" size={14} />
+          </button>
         </div>
-
-        <!-- Banner Peringatan Overlay OBS -->
-        <div class="notice-banner">
-          <div class="notice-left">
-            <div class="notice-icon">📺</div>
-            <div class="notice-text">
-              <h4>Overlay Aktif di OBS Studio / TikTok Live Studio</h4>
-              <p>Pasang URL Browser Source berikut di OBS: <code>http://localhost:3456/overlay</code></p>
-            </div>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-outline" onclick="copyObsUrl()">📋 Salin Link</button>
-            <a href="/overlay" target="_blank" class="btn btn-orange">Buka Link Overlay</a>
-          </div>
-        </div>
-
-        <!-- Card Pengaturan Posisi & Tampilan Overlay OBS -->
-        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 22px;">📐</span>
-              <div>
-                <h4 style="font-size: 15px; font-weight: 800; color: #f8fafc;">Atur Posisi & Ukuran Overlay di Layar</h4>
-                <p style="font-size: 12px; color: var(--text-muted);">Pilih posisi cepat, geser slider, atau drag langsung widget di layar browser overlay!</p>
-              </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <button class="btn btn-outline" style="font-size: 11.5px; padding: 5px 12px;" onclick="resetOverlayPosition()">🔄 Reset Posisi</button>
-            </div>
-          </div>
-
-          <!-- Preset Posisi 5 Arah -->
-          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-            <span style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-right: 6px;">Posisi Cepat:</span>
-            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('top-left')">↖️ Kiri Atas</button>
-            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('top-right')">↗️ Kanan Atas</button>
-            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('bottom-left')">↙️ Kiri Bawah</button>
-            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('bottom-right')">↘️ Kanan Bawah</button>
-            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('center')">⏺️ Tengah Layar</button>
-          </div>
-
-          <!-- Slider Posisi X, Y, dan Scale -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; background: var(--card-inner); padding: 14px; border-radius: 12px; border: 1px solid var(--card-border);">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                <span style="font-weight: 700; color: #38bdf8;">Horizontal (X):</span>
-                <span id="label-pos-x" style="color: #cbd5e1; font-weight: 700;">24 px</span>
-              </div>
-              <input type="range" id="slider-pos-x" min="0" max="1920" value="24" style="accent-color: #38bdf8; cursor: pointer;" oninput="onPositionSliderChange()">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                <span style="font-weight: 700; color: #f97316;">Vertikal (Y):</span>
-                <span id="label-pos-y" style="color: #cbd5e1; font-weight: 700;">24 px</span>
-              </div>
-              <input type="range" id="slider-pos-y" min="0" max="1080" value="24" style="accent-color: #f97316; cursor: pointer;" oninput="onPositionSliderChange()">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                <span style="font-weight: 700; color: #10b981;">Ukuran (Scale):</span>
-                <span id="label-pos-scale" style="color: #cbd5e1; font-weight: 700;">1.00x</span>
-              </div>
-              <input type="range" id="slider-pos-scale" min="0.5" max="2.0" step="0.05" value="1.0" style="accent-color: #10b981; cursor: pointer;" oninput="onPositionSliderChange()">
-            </div>
-          </div>
-
-          <div style="font-size: 11.5px; color: #64748b;">
-            💡 <b>Tips Geser Bebas:</b> Kamu juga bisa langsung <b>klik dan seret (drag & drop)</b> piringan vinyl di layar browser atau lewat fitur <i>Interact</i> di OBS Studio!
-          </div>
-        </div>
-
-        <!-- Bar Sakelar Master (Master Switches) -->
-        <div class="master-switches-bar">
-          
-          <div class="switch-pill">
-            <span>⚡ Semua Interaksi</span>
-            <label class="toggle">
-              <input type="checkbox" id="sw-all" checked onchange="toggleMasterSwitch('allInteractions', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="switch-pill">
-            <span>⌨️ Keystroke</span>
-            <label class="toggle">
-              <input type="checkbox" id="sw-keystroke" checked onchange="toggleMasterSwitch('keystroke', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="switch-pill">
-            <span>🕸️ Webhook</span>
-            <label class="toggle">
-              <input type="checkbox" id="sw-webhook" checked onchange="toggleMasterSwitch('webhook', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="switch-pill">
-            <span>📹 OBS</span>
-            <label class="toggle">
-              <input type="checkbox" id="sw-obs" checked onchange="toggleMasterSwitch('obs', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="switch-pill">
-            <span>⛏️ Minecraft Command</span>
-            <label class="toggle">
-              <input type="checkbox" id="sw-minecraft" checked onchange="toggleMasterSwitch('minecraft', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="switch-pill">
-            <span>⚔️ Poin Win/Lose</span>
-            <label class="toggle">
-              <input type="checkbox" id="sw-winlose" checked onchange="toggleMasterSwitch('winLose', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="switch-pill">
-            <span>🎡 Spin Roulette</span>
-            <label class="toggle">
-              <input type="checkbox" id="sw-spin" checked onchange="toggleMasterSwitch('spinRoulette', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-        </div>
-
-        <!-- Action Row -->
-        <div class="control-bar">
-          <div class="tabs-group">
-            <button class="tab-btn active" id="tab-filter-interaksi">Interaksi (<span id="count-interaksi">0</span>)</button>
-            <button class="tab-btn" id="tab-filter-aktivitas">Aktivitas (<span id="count-aktivitas">0</span>)</button>
-          </div>
-
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" class="search-input" placeholder="Cari Nama Interaksi..." oninput="filterInteractions()">
-          </div>
-
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-outline" onclick="copyObsUrl()">📺 Link Overlay (0/10)</button>
-            <button class="btn btn-green" onclick="openCreateModal()">+ Interaksi</button>
-          </div>
-        </div>
-
-        <!-- Grid Kartu Interaksi -->
-        <div class="interactions-grid" id="interactions-container">
-          <!-- Di-render via JavaScript -->
-        </div>
-
-      </div>
-
-      <!-- ============================================================
-           TAB 2: MUSIC REQUEST & VINYL HUB (FITUR LIMUSIC KITA)
-           ============================================================ -->
-      <div class="tab-view" id="view-music-hub">
-        <div class="page-header">
-          <h1>Music Request & Vinyl Overlay Hub</h1>
-          <p>Kelola lagu yang di-request penonton lewat TikTok Live chat (!play, !skip, !revoke) dengan piringan hitam berputar.</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          
-          <!-- Now Playing Card -->
-          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-weight: 700; font-size: 15px;">Sedang Dimainkan (Now Playing)</span>
-              <div style="display: flex; gap: 6px;">
-                <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="revokeTrack()">↩️ Revoke</button>
-                <button class="btn btn-outline" style="font-size: 11px; padding: 4px 8px;" onclick="skipTrack()">⏭️ Skip</button>
-              </div>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 14px; background: var(--card-inner); padding: 14px; border-radius: 12px;">
-              <img id="music-thumb" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=120" style="width: 64px; height: 64px; border-radius: 10px; object-fit: cover;">
-              <div style="min-width: 0; flex: 1;">
-                <div id="music-title" style="font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Belum Ada Lagu Diputar</div>
-                <div id="music-artist" style="font-size: 13px; color: var(--text-muted);">Antrean kosong</div>
-                <div id="music-badge" style="font-size: 11px; color: #38bdf8; font-weight: 700; margin-top: 2px;"></div>
-              </div>
-            </div>
-
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="manual-song" class="input-field" placeholder="Request lagu manual (Host)..." onkeydown="if(event.key==='Enter')manualRequestSong()">
-              <button class="btn btn-outline" onclick="manualRequestSong()">+ Antrekan</button>
-            </div>
-          </div>
-
-          <!-- Queue List -->
-          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-weight: 700; font-size: 15px;">Antrean Lagu (<span id="music-queue-count">0</span>)</span>
-              <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="clearSongQueue()">Hapus Semua</button>
-            </div>
-
-            <div id="music-queue-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto;">
-              <!-- Queue item render -->
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ============================================================
-           TAB 3: SIMULATOR INTERAKSI (TEST 1-KLIK)
-           ============================================================ -->
-      <div class="tab-view" id="view-simulator">
-        <div class="page-header">
-          <h1>Panel Simulator Interaksi</h1>
-          <p>Uji coba pengiriman gift, like, follow, share, atau chat tiruan secara instan untuk memastikan alert & suara di OBS muncul normal tanpa harus menunggu live asli.</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-          
-          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-weight: 700; font-size: 15px; color: #f43f5e;">🎁 Simulasi Gift TikTok</span>
-            <p style="font-size: 12.5px; color: var(--text-muted);">Pilih jenis gift yang ingin disimulasikan:</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <button class="btn btn-orange" style="background: linear-gradient(90deg, #f43f5e, #8b5cf6); border: none; font-weight: 800; color: #fff; width: 100%; padding: 10px;" onclick="simEvent('gift', { giftName: 'Donat Hype', diamonds: 20 })">🔥 Kirim 20 Koin (Test Jedag-Jedug JJ Video Alert)</button>
-              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Rose', diamonds: 1 })">🌹 Gift Rose (1 Koin)</button>
-              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'TikTok', diamonds: 1 })">🎵 Gift TikTok</button>
-              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Whale', diamonds: 100 })">🐳 Gift Paus (100 Koin)</button>
-              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Donut', diamonds: 30 })">🍩 Gift Donat (30 Koin)</button>
-              <div style="display: flex; gap: 8px; width: 100%; margin-top: 6px; align-items: center;">
-                <input type="number" id="sim-custom-coins" class="input-field" value="20" min="1" placeholder="Koin..." style="width: 100px; padding: 6px 10px;">
-                <button class="btn btn-outline" style="font-size: 12px; flex: 1;" onclick="simCustomCoins()">⚡ Tes Kustom Jumlah Koin</button>
-              </div>
-            </div>
-          </div>
-
-          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-weight: 700; font-size: 15px; color: #38bdf8;">❤️ Simulasi Like & Komunitas</span>
-            <p style="font-size: 12.5px; color: var(--text-muted);">Uji trigger Like kelipatan 50, Follow baru, atau Share:</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <button class="btn btn-outline" onclick="simEvent('like')">❤️ Tap-tap (+50 Like)</button>
-              <button class="btn btn-outline" onclick="simEvent('follow')">🌟 Penonton Follow</button>
-              <button class="btn btn-outline" onclick="simEvent('share')">📢 Penonton Share</button>
-            </div>
-          </div>
-
-          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-weight: 700; font-size: 15px; color: #10b981;">⌨️ & 🎡 Simulasi Aksi Khusus</span>
-            <p style="font-size: 12.5px; color: var(--text-muted);">Uji coba Keystroke lompat atau Roda Roulette:</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <button class="btn btn-outline" onclick="simEvent('chat', { comment: '!jump' })">⌨️ Chat !jump (Keystroke)</button>
-              <button class="btn btn-outline" onclick="simEvent('chat', { comment: '!spin' })">🎡 Chat !spin (Roulette Wheel)</button>
-              <button class="btn btn-outline" onclick="simEvent('chat', { comment: '!play lany xxl' })">🎵 Chat !play lany xxl</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ============================================================
-           TAB 4: LOG AKTIVITAS
-           ============================================================ -->
-      <div class="tab-view" id="view-logs">
-        <div class="page-header">
-          <h1>Log Aktivitas & Chat TikTok Live</h1>
-          <p>Catatan riwayat pesan chat penonton dan event interaksi yang masuk secara realtime.</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          
-          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-weight: 700; font-size: 15px;">⚡ Riwayat Alert Interaksi</span>
-            <div id="logs-alerts-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
-              <!-- Render alert logs -->
-            </div>
-          </div>
-
-          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-weight: 700; font-size: 15px;">💬 Log Chat Live Streamer</span>
-            <div id="logs-chat-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
-              <!-- Render chat logs -->
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ============================================================
-       MODAL: TAMBAH / EDIT INTERAKSI BARU
-       ============================================================ -->
-  <div class="modal-backdrop" id="interaction-modal">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 id="modal-title">Tambah Interaksi Baru</h3>
-        <button class="btn btn-outline" style="padding: 4px 8px;" onclick="closeModal()">✕</button>
-      </div>
-
-      <input type="hidden" id="modal-inter-id" value="">
-
-      <div class="form-group">
-        <label>Nama Interaksi</label>
-        <input type="text" id="form-name" class="input-field" placeholder="Contoh: Gift Rose -> Alert & SFX">
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div class="form-group">
-          <label>Kategori Aksi</label>
-          <select id="form-category" class="input-field" onchange="onCategoryChange()">
-            <option value="alert">📺 Alert Visual & Suara</option>
-            <option value="jj">🎬 Video Alert / Jedag-Jedug (JJ)</option>
-            <option value="keystroke">⌨️ Keystroke (Game Automation)</option>
-            <option value="spin">🎡 Spin Roulette (Roda)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Pemicu (Trigger)</label>
-          <select id="form-trigger-type" class="input-field" onchange="onTriggerTypeChange()">
-            <option value="gift">🎁 Gift TikTok</option>
-            <option value="like">❤️ Like / Tap Layar</option>
-            <option value="follow">🌟 Follow Streamer</option>
-            <option value="share">📢 Share Live Stream</option>
-            <option value="chat">💬 Komentar Chat</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="group-trigger-gift" style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
-        <div class="form-group">
-          <label>Nama Gift TikTok</label>
-          <input type="text" id="form-gift-name" class="input-field" placeholder="Rose, TikTok, Whale, Donut (atau 'any' untuk semua gift)">
-        </div>
-        <div class="form-group">
-          <label>Minimal Koin</label>
-          <input type="number" id="form-gift-coins" class="input-field" value="1" min="1" placeholder="Contoh: 20">
-        </div>
-      </div>
-
-      <div id="group-trigger-like" class="form-group" style="display: none;">
-        <label>Jumlah Kelipatan Like</label>
-        <input type="number" id="form-like-count" class="input-field" value="50" min="1">
-      </div>
-
-      <div id="group-trigger-chat" class="form-group" style="display: none;">
-        <label>Kata Kunci Chat</label>
-        <input type="text" id="form-chat-keyword" class="input-field" placeholder="Contoh: !jump / !spin / halo">
-      </div>
-
-      <div class="form-group">
-        <label>Judul Alert</label>
-        <input type="text" id="form-action-title" class="input-field" value="{user} Mengirim {gift}! 🌹">
-      </div>
-
-      <div class="form-group">
-        <label>Pesan Alert</label>
-        <input type="text" id="form-action-msg" class="input-field" value="Terima kasih banyak atas dukungannya!">
-      </div>
-
-      <div id="group-action-alert" style="display: flex; flex-direction: column; gap: 14px;">
-        
-        <!-- Box 1: Sumber Video / Media Kustom (Upload dari PC / Pilih File) -->
-        <div style="background: var(--card-inner); padding: 14px; border-radius: 14px; border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label id="label-media-url" style="font-weight: 800; color: #f8fafc; font-size: 13.5px; margin-bottom: 0;">🎬 Video Alert / Jedag-Jedug dari Kita</label>
-            <span id="upload-status" style="font-size: 11.5px; font-weight: 700; color: #38bdf8;"></span>
-          </div>
-
-          <!-- Tombol Aksi Upload File Video Langsung dari Komputer -->
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <input type="file" id="form-video-file-input" accept="video/mp4,video/webm,video/*,image/gif" style="display: none;" onchange="uploadVideoFromComputer(this)">
-            <button type="button" class="btn btn-primary" style="font-size: 12px; padding: 7px 14px; background: linear-gradient(90deg, #38bdf8, #818cf8); color: #020617; font-weight: 800;" onclick="document.getElementById('form-video-file-input').click()">
-              📤 Upload Video Sendiri (.mp4 / .webm)
-            </button>
-            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 7px 12px;" onclick="loadAssetsList(true)">
-              🔄 Segarkan File Tersimpan
-            </button>
-          </div>
-
-          <!-- Dropdown Pilihan File yang Ada di Folder /assets -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-size: 11.5px; color: #94a3b8; font-weight: 600;">Atau pilih dari koleksi video di komputer yang sudah pernah diupload:</span>
-            <select id="form-asset-select" class="input-field" style="font-size: 12px; padding: 6px 10px;" onchange="onSelectAssetFile(this.value)">
-              <option value="">-- Pilih file video di server --</option>
-            </select>
-          </div>
-
-          <!-- Input URL / File Path Manual -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-size: 11px; color: #94a3b8;">URL / Path File Video yang Aktif:</span>
-            <input type="text" id="form-media-url" class="input-field" value="https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4" oninput="updateVideoPreview(this.value)">
-          </div>
-
-          <!-- Pratinjau Video Player Langsung di Modal -->
-          <div id="video-preview-container" style="display: flex; flex-direction: column; gap: 4px; background: #000; padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8;">
-              <span style="font-weight: 700;">📺 Pratinjau Video (Bisa Ditonton Langsung):</span>
-              <span id="preview-video-duration" style="color: #38bdf8; font-weight: 800;"></span>
-            </div>
-            <video id="form-video-preview" controls playsinline style="max-height: 150px; width: 100%; border-radius: 6px; background: #020617; object-fit: contain;"></video>
-          </div>
-
-          <!-- Pilihan Cepat Preset -->
-          <div id="group-jj-presets" style="display: flex; flex-wrap: wrap; gap: 6px;">
-            <span style="font-size: 11px; color: #94a3b8; width: 100%;">Pilihan Cepat Contoh:</span>
-            <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4')">⚡ JJ Bass Hype (Default)</button>
-            <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif')">🌹 Mawar Pop</button>
-          </div>
-        </div>
-
-        <!-- Box 2: Pengaturan Durasi Video Diputar (Berapa Detik) -->
-        <div style="background: var(--card-inner); padding: 14px; border-radius: 14px; border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label style="font-weight: 800; color: #facc15; font-size: 13.5px; margin-bottom: 0;">⏱️ Atur Berapa Detik Video Ditampilkan di Stream</label>
-            <span id="label-duration-display" style="font-weight: 900; font-size: 14px; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 12px; border-radius: 99px; border: 1px solid rgba(56, 189, 248, 0.4);">10 Detik</span>
-          </div>
-
-          <!-- Slider Durasi (1 s/d 60 detik) -->
-          <input type="range" id="form-duration-slider" min="1" max="60" value="10" step="1" style="accent-color: #38bdf8; cursor: pointer; height: 6px;" oninput="onDurationSliderChange(this.value)">
-
-          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;">
-            <!-- Tombol Preset Detik Cepat -->
-            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-              <span style="font-size: 11px; color: #64748b; align-self: center;">Pilihan Cepat:</span>
-              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(5)">5 Detik</button>
-              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(8)">8 Detik</button>
-              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(10)">10 Detik</button>
-              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(15)">15 Detik</button>
-              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(20)">20 Detik</button>
-              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(30)">30 Detik</button>
-            </div>
-
-            <!-- Input Angka Manual -->
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <input type="number" id="form-duration" class="input-field" value="10" min="1" max="180" style="width: 70px; padding: 4px 8px; font-weight: 800; text-align: center; color: #38bdf8;" oninput="onDurationInputChange(this.value)">
-              <span style="font-size: 12px; color: #cbd5e1; font-weight: 600;">detik</span>
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
-            <input type="checkbox" id="form-auto-end" checked style="width: 16px; height: 16px; accent-color: #38bdf8;">
-            <label for="form-auto-end" style="font-size: 11.5px; color: #94a3b8; cursor: pointer; margin-bottom: 0;">Selesai otomatis jika video asli habis sebelum durasi selesai</label>
-          </div>
-        </div>
-
-        <!-- Box 3: Efek Suara, TTS & Visual -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group">
-            <label>Efek Suara Tambahan (SFX)</label>
-            <select id="form-sfx" class="input-field">
-              <option value="none">🔇 Tidak Ada SFX (Gunakan Suara Video Asli)</option>
-              <option value="jj_beat">⚡ Jedag-Jedug (DJ Bass Beat Drop)</option>
-              <option value="bell">🔔 Bell / Chime</option>
-              <option value="fanfare">🎺 Fanfare Kemenangan</option>
-              <option value="pop">🫧 Pop Effect</option>
-              <option value="ting">✨ Ting Ting</option>
-            </select>
-          </div>
-          <div class="form-group" style="display: flex; flex-direction: column; justify-content: center; gap: 6px;">
-            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-              <input type="checkbox" id="form-tts" checked style="width: 18px; height: 18px;">
-              <label for="form-tts" style="margin-bottom: 0; cursor: pointer;">Suara TTS (Bahasa Indonesia)</label>
-            </div>
-            <div id="row-jj-fx" class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-              <input type="checkbox" id="form-jj-effects" checked style="width: 18px; height: 18px;">
-              <label for="form-jj-effects" style="margin-bottom: 0; cursor: pointer;">Flash Strobe & Bass Shake Layar</label>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div id="group-action-keystroke" class="form-group" style="display: none;">
-        <label>Tombol Keyboard yang Ditekan Otomatis (Windows)</label>
-        <select id="form-keystroke-key" class="input-field">
-          <option value="SPACE">SPACE (Lompat / Jump)</option>
-          <option value="W">W (Maju)</option>
-          <option value="S">S (Mundur)</option>
-          <option value="A">A (Kiri)</option>
-          <option value="D">D (Kanan)</option>
-          <option value="F">F (Interact / Ambil)</option>
-          <option value="E">E (Inventory / Buka)</option>
-          <option value="1">Angka 1</option>
-          <option value="2">Angka 2</option>
-          <option value="ENTER">ENTER</option>
-          <option value="ESC">ESC</option>
-        </select>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-        <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-        <button class="btn btn-green" onclick="saveInteractionForm()">Simpan Interaksi</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let interactionsList = [];
-    let currentMasterSwitches = {};
-
-    function copyObsUrl() {
-      const url = window.location.origin + '/overlay';
-      navigator.clipboard.writeText(url).then(() => {
-        alert('Tautan Overlay OBS berhasil disalin!\n' + url + '\n\nTempelkan link ini di Browser Source OBS Studio atau TikTok Live Studio.');
-      });
-    }
-
-    function switchNav(viewId, event) {
-      if (event) event.preventDefault();
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
-
-      const targetNav = document.getElementById('nav-' + viewId);
-      if (targetNav) targetNav.classList.add('active');
-
-      const targetView = document.getElementById('view-' + viewId);
-      if (targetView) targetView.classList.add('active');
-    }
-
-    async function promptConnectTikTok() {
-      const username = prompt('Masukkan username akun TikTok Live Anda:', 'xolt.san');
-      if (!username) return;
-      try {
-        const res = await fetch('/api/tiktok/connect', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: username.trim() })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert('Berhasil! Bot sedang memantau siaran @' + username);
-          loadInteractions();
+      );
+    };
+
+    // ========================================================================
+    // MAIN APP COMPONENT
+    // ========================================================================
+    function App() {
+      const [activeTab, setActiveTab] = useState('pusat-interaksi');
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      const [status, setStatus] = useState(null);
+      const [interactions, setInteractions] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [toast, setToast] = useState(null);
+      const [searchQuery, setSearchQuery] = useState('');
+      
+      // Preset Stream State
+      const [activePreset, setActivePreset] = useState('default');
+      
+      // Modal State
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [editingItem, setEditingItem] = useState(null);
+      const [assetFiles, setAssetFiles] = useState([]);
+      const [uploading, setUploading] = useState(false);
+
+      // Form State
+      const [formName, setFormName] = useState('');
+      const [formCategory, setFormCategory] = useState('jj');
+      const [formTriggerType, setFormTriggerType] = useState('gift');
+      const [formGiftName, setFormGiftName] = useState('any');
+      const [formGiftCoins, setFormGiftCoins] = useState(20);
+      const [formLikeCount, setFormLikeCount] = useState(50);
+      const [formChatKeyword, setFormChatKeyword] = useState('!hype');
+      const [formTitle, setFormTitle] = useState('🔥 SULTAN ALERT: @{user}! 🔥');
+      const [formMsg, setFormMsg] = useState('Mengirim {count}x {gift} bernilai {coins} Koin!');
+      const [formMediaUrl, setFormMediaUrl] = useState('/assets/jj_baru_2.mp4');
+      const [formDuration, setFormDuration] = useState(10);
+      const [formAutoEnd, setFormAutoEnd] = useState(true);
+      const [formSfx, setFormSfx] = useState('none');
+      const [formTts, setFormTts] = useState(false);
+      const [formKeystroke, setFormKeystroke] = useState('SPACE');
+
+      // Fetch status and interactions
+      const fetchStatus = async () => {
+        try {
+          const res = await fetch('/api/status');
+          const data = await res.json();
+          setStatus(data);
+        } catch (e) {
+          console.error(e);
         }
-      } catch(e) {
-        alert('Error: ' + e.message);
-      }
-    }
+      };
 
-    async function toggleMasterSwitch(key, value) {
-      try {
-        await fetch('/api/interactions/master-switch', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key, value })
-        });
-      } catch(e) {}
-    }
-
-    async function toggleInteraction(id) {
-      try {
-        await fetch('/api/interactions/toggle', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        });
-        loadInteractions();
-      } catch(e) {}
-    }
-
-    async function testInteraction(id) {
-      try {
-        await fetch('/api/interactions/test', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        });
-        alert('⚡ Simulasi interaksi telah dikirim ke Overlay OBS!');
-      } catch(e) {
-        alert('Gagal: ' + e.message);
-      }
-    }
-
-    async function deleteInteraction(id) {
-      if (!confirm('Hapus interaksi ini?')) return;
-      try {
-        await fetch('/api/interactions/delete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        });
-        loadInteractions();
-      } catch(e) {}
-    }
-
-    async function simEvent(type, extra = {}) {
-      try {
-        await fetch('/api/simulator/event', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type, user: 'Penonton_TikTok', ...extra })
-        });
-        alert(`Simulasi event [${type}] berhasil dipicu!`);
-      } catch(e) {
-        alert('Error: ' + e.message);
-      }
-    }
-
-    function renderInteractions(items) {
-      const container = document.getElementById('interactions-container');
-      document.getElementById('count-interaksi').innerText = items.length;
-      document.getElementById('count-aktivitas').innerText = items.length;
-
-      if (items.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada interaksi. Klik [+ Interaksi] untuk membuat baru!</div>';
-        return;
-      }
-
-      container.innerHTML = items.map(item => {
-        const cat = item.category || 'alert';
-        let icon = '📺';
-        if (cat === 'jj') icon = '🎬';
-        if (cat === 'keystroke') icon = '⌨️';
-        if (cat === 'spin') icon = '🎡';
-
-        let triggerDesc = 'Pemicu: ' + (item.trigger?.type || 'gift').toUpperCase();
-        if (item.trigger?.type === 'gift') {
-          const minCoins = item.trigger.minCoins ? ` (${item.trigger.minCoins}+ Koin)` : '';
-          triggerDesc = `🎁 Gift: ${item.trigger.giftName || 'Semua Gift'}${minCoins}`;
-        } else if (item.trigger?.type === 'like') {
-          triggerDesc = `❤️ Like: ${item.trigger.likeCount || 50}x`;
-        } else if (item.trigger?.type === 'chat') {
-          triggerDesc = `💬 Chat: ${item.trigger.chatKeyword || ''}`;
+      const fetchInteractions = async () => {
+        try {
+          setLoading(true);
+          const res = await fetch('/api/interactions');
+          const data = await res.json();
+          setInteractions(data.interactions || []);
+        } catch (e) {
+          showToast('Gagal memuat interaksi', 'error');
+        } finally {
+          setLoading(false);
         }
+      };
 
-        let actionDesc = 'Aksi: Alert Visual & SFX';
-        if (cat === 'jj') actionDesc = '🎬 Video Alert Jedag-Jedug (JJ)';
-        if (cat === 'keystroke') actionDesc = `⌨️ Tekan [${item.action?.key || 'SPACE'}]`;
-        if (cat === 'spin') actionDesc = `🎡 Spin Roda Roulette`;
-
-        return `
-          <div class="interaction-card">
-            <div class="card-head">
-              <div class="card-info">
-                <div class="card-icon">${icon}</div>
-                <div>
-                  <div class="card-title-text">${item.name}</div>
-                  <div style="font-size: 11px; color: var(--text-muted);">${cat.toUpperCase()}</div>
-                </div>
-              </div>
-              <label class="toggle">
-                <input type="checkbox" ${item.enabled ? 'checked' : ''} onchange="toggleInteraction('${item.id}')">
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="badges-row">
-              <span class="badge-tag badge-trigger">${triggerDesc}</span>
-              <span class="badge-tag badge-action">${actionDesc}</span>
-            </div>
-
-            <div class="card-actions">
-              <button class="btn btn-outline" style="font-size: 11px; padding: 4px 10px;" onclick="testInteraction('${item.id}')">🧪 Test</button>
-              <div style="display: flex; gap: 6px;">
-                <button class="btn btn-outline" style="font-size: 11px; padding: 4px 8px;" onclick="openEditModal('${item.id}')">✏️</button>
-                <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="deleteInteraction('${item.id}')">🗑️</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function filterInteractions() {
-      const q = document.getElementById('search-input').value.toLowerCase().trim();
-      if (!q) {
-        renderInteractions(interactionsList);
-      } else {
-        const filtered = interactionsList.filter(i => 
-          i.name.toLowerCase().includes(q) || 
-          (i.trigger?.giftName && i.trigger.giftName.toLowerCase().includes(q)) ||
-          (i.trigger?.chatKeyword && i.trigger.chatKeyword.toLowerCase().includes(q))
-        );
-        renderInteractions(filtered);
-      }
-    }
-
-    // ============================================================
-    // PENGATURAN POSISI OVERLAY (PRESET & SLIDER)
-    // ============================================================
-    async function setPresetPos(preset) {
-      try {
-        await fetch('/api/overlay/config', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pos: preset })
-        });
-        loadOverlayConfig();
-      } catch(e) {}
-    }
-
-    async function onPositionSliderChange() {
-      const x = parseInt(document.getElementById('slider-pos-x').value, 10);
-      const y = parseInt(document.getElementById('slider-pos-y').value, 10);
-      const scale = parseFloat(document.getElementById('slider-pos-scale').value);
-
-      document.getElementById('label-pos-x').innerText = x + ' px';
-      document.getElementById('label-pos-y').innerText = y + ' px';
-      document.getElementById('label-pos-scale').innerText = scale.toFixed(2) + 'x';
-
-      try {
-        await fetch('/api/overlay/config', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pos: 'custom', x, y, scale })
-        });
-      } catch(e) {}
-    }
-
-    async function resetOverlayPosition() {
-      setPresetPos('top-left');
-      document.getElementById('slider-pos-scale').value = 1.0;
-      onPositionSliderChange();
-    }
-
-    async function loadOverlayConfig() {
-      try {
-        const res = await fetch('/api/overlay/config');
-        if (!res.ok) return;
-        const cfg = await res.json();
-        if (cfg.x !== undefined) {
-          document.getElementById('slider-pos-x').value = cfg.x;
-          document.getElementById('label-pos-x').innerText = cfg.x + ' px';
+      const fetchAssets = async () => {
+        try {
+          const res = await fetch('/api/assets/list');
+          const data = await res.json();
+          setAssetFiles(data.files || []);
+        } catch (e) {
+          console.error(e);
         }
-        if (cfg.y !== undefined) {
-          document.getElementById('slider-pos-y').value = cfg.y;
-          document.getElementById('label-pos-y').innerText = cfg.y + ' px';
-        }
-        if (cfg.scale !== undefined) {
-          document.getElementById('slider-pos-scale').value = cfg.scale;
-          document.getElementById('label-pos-scale').innerText = Number(cfg.scale).toFixed(2) + 'x';
-        }
-      } catch(e) {}
-    }
+      };
 
-    async function loadInteractions() {
-      try {
-        const res = await fetch('/api/interactions');
-        if (!res.ok) return;
-        const data = await res.json();
-        interactionsList = data.interactions || [];
-        currentMasterSwitches = data.masterSwitches || {};
+      useEffect(() => {
+        fetchStatus();
+        fetchInteractions();
+        fetchAssets();
+        const interval = setInterval(fetchStatus, 2000);
+        return () => clearInterval(interval);
+      }, []);
 
-        // Update Switch Checkboxes
-        if (currentMasterSwitches.allInteractions !== undefined) document.getElementById('sw-all').checked = currentMasterSwitches.allInteractions;
-        if (currentMasterSwitches.keystroke !== undefined) document.getElementById('sw-keystroke').checked = currentMasterSwitches.keystroke;
-        if (currentMasterSwitches.webhook !== undefined) document.getElementById('sw-webhook').checked = currentMasterSwitches.webhook;
-        if (currentMasterSwitches.obs !== undefined) document.getElementById('sw-obs').checked = currentMasterSwitches.obs;
-        if (currentMasterSwitches.minecraft !== undefined) document.getElementById('sw-minecraft').checked = currentMasterSwitches.minecraft;
-        if (currentMasterSwitches.winLose !== undefined) document.getElementById('sw-winlose').checked = currentMasterSwitches.winLose;
-        if (currentMasterSwitches.spinRoulette !== undefined) document.getElementById('sw-spin').checked = currentMasterSwitches.spinRoulette;
+      const showToast = (message, type = 'info') => {
+        setToast({ message, type });
+      };
 
-        filterInteractions();
-        loadOverlayConfig();
-
-        // Render Recent Alerts in Logs Tab
-        if (data.recentAlertLogs) {
-          const alertLogsEl = document.getElementById('logs-alerts-container');
-          if (alertLogsEl) {
-            alertLogsEl.innerHTML = data.recentAlertLogs.map(l => `
-              <div style="background: var(--card-inner); padding: 8px 12px; border-radius: 8px; font-size: 12px; display: flex; justify-content: space-between;">
-                <span><b>@${l.user}</b>: ${l.details}</span>
-                <span style="color: #64748b;">${new Date(l.time).toLocaleTimeString()}</span>
-              </div>
-            `).join('') || '<div style="color: #64748b; font-size: 12px;">Belum ada riwayat alert.</div>';
-          }
-        }
-      } catch(e) {}
-    }
-
-    // ============================================================
-    // FITUR ASSET & VIDEO CUSTOM (UPLOAD DARI PC & DURASI DETIK)
-    // ============================================================
-    async function loadAssetsList(alertSuccess = false) {
-      try {
-        const res = await fetch('/api/assets/list');
-        if (!res.ok) return;
-        const data = await res.json();
-        const select = document.getElementById('form-asset-select');
-        if (!select) return;
-        select.innerHTML = '<option value="">-- Pilih file video di server --</option>';
-        if (data.files && data.files.length > 0) {
-          data.files.forEach(f => {
-            const opt = document.createElement('option');
-            opt.value = f.url;
-            opt.innerText = `${f.name} (${f.size})`;
-            select.appendChild(opt);
-          });
-        }
-        if (alertSuccess) {
-          alert('Daftar file asset diperbarui! Ditemukan ' + (data.files ? data.files.length : 0) + ' file.');
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    function onSelectAssetFile(url) {
-      if (!url) return;
-      document.getElementById('form-media-url').value = url;
-      updateVideoPreview(url);
-    }
-
-    function setJJVideoPreset(url) {
-      document.getElementById('form-media-url').value = url;
-      updateVideoPreview(url);
-    }
-
-    function updateVideoPreview(url) {
-      const preview = document.getElementById('form-video-preview');
-      const badge = document.getElementById('preview-video-duration');
-      if (!url) {
-        if (preview) preview.removeAttribute('src');
-        if (badge) badge.innerText = '';
-        return;
-      }
-      if (preview) {
-        preview.src = url;
-        preview.onloadedmetadata = () => {
-          if (badge && preview.duration && !isNaN(preview.duration)) {
-            const dur = Math.round(preview.duration);
-            badge.innerText = `Durasi Asli: ${dur}s`;
-            // Sarankan durasi jika masih default
-            const currentDur = parseInt(document.getElementById('form-duration').value, 10);
-            if (dur > 0 && dur <= 60 && (!currentDur || currentDur === 10 || currentDur === 5)) {
-              setDurationSeconds(dur);
-            }
+      // Modal ESC key listener
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.key === 'Escape' && isModalOpen) {
+            setIsModalOpen(false);
           }
         };
-      }
-    }
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [isModalOpen]);
 
-    async function uploadVideoFromComputer(input) {
-      if (!input.files || input.files.length === 0) return;
-      const file = input.files[0];
-      const status = document.getElementById('upload-status');
-      if (status) status.innerText = `⏳ Mengupload ${file.name}...`;
-
-      try {
-        const res = await fetch('/api/upload/video?filename=' + encodeURIComponent(file.name), {
-          method: 'POST',
-          body: file
-        });
-        const data = await res.json();
-        if (data.success && data.url) {
-          if (status) status.innerText = `✅ Berhasil diupload: ${data.filename}!`;
-          document.getElementById('form-media-url').value = data.url;
-          updateVideoPreview(data.url);
-          loadAssetsList();
-        } else {
-          if (status) status.innerText = `❌ Gagal: ${data.error || 'Upload gagal'}`;
-        }
-      } catch (e) {
-        if (status) status.innerText = `❌ Error: ${e.message}`;
-      }
-    }
-
-    function setDurationSeconds(sec) {
-      const val = Math.max(1, parseInt(sec, 10) || 10);
-      document.getElementById('form-duration').value = val;
-      document.getElementById('form-duration-slider').value = Math.min(val, 60);
-      document.getElementById('label-duration-display').innerText = `${val} Detik`;
-    }
-
-    function onDurationSliderChange(val) {
-      setDurationSeconds(val);
-    }
-
-    function onDurationInputChange(val) {
-      const num = parseInt(val, 10) || 1;
-      document.getElementById('form-duration-slider').value = Math.min(num, 60);
-      document.getElementById('label-duration-display').innerText = `${num} Detik`;
-    }
-
-    async function simCustomCoins() {
-      const coins = parseInt(document.getElementById('sim-custom-coins').value, 10) || 20;
-      await simEvent('gift', { giftName: 'Donat Hype', diamonds: coins });
-    }
-
-    // Modal Helpers
-    function openCreateModal() {
-      document.getElementById('modal-title').innerText = 'Tambah Interaksi Baru';
-      document.getElementById('modal-inter-id').value = '';
-      document.getElementById('form-name').value = '';
-      document.getElementById('form-category').value = 'jj';
-      document.getElementById('form-trigger-type').value = 'gift';
-      document.getElementById('form-gift-name').value = 'any';
-      document.getElementById('form-gift-coins').value = '20';
-      document.getElementById('form-like-count').value = '50';
-      document.getElementById('form-chat-keyword').value = '';
-      document.getElementById('form-action-title').value = '🔥 SULTAN ALERT: @{user}! 🔥';
-      document.getElementById('form-action-msg').value = 'Mengirim {count}x {gift} bernilai {coins} Koin! Mode Jedag-Jedug AKTIF!';
-      document.getElementById('form-media-url').value = 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4';
-      document.getElementById('form-sfx').value = 'jj_beat';
-      setDurationSeconds(10);
-      document.getElementById('form-tts').checked = true;
-      if (document.getElementById('form-jj-effects')) document.getElementById('form-jj-effects').checked = true;
-      if (document.getElementById('form-auto-end')) document.getElementById('form-auto-end').checked = true;
-      onCategoryChange();
-      onTriggerTypeChange();
-      loadAssetsList();
-      updateVideoPreview('https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4');
-      document.getElementById('interaction-modal').classList.add('show');
-    }
-
-    function openEditModal(id) {
-      const item = interactionsList.find(i => i.id === id);
-      if (!item) return;
-      document.getElementById('modal-title').innerText = 'Edit Interaksi';
-      document.getElementById('modal-inter-id').value = item.id;
-      document.getElementById('form-name').value = item.name || '';
-      document.getElementById('form-category').value = item.category || 'alert';
-      document.getElementById('form-trigger-type').value = item.trigger?.type || 'gift';
-      document.getElementById('form-gift-name').value = item.trigger?.giftName || '';
-      document.getElementById('form-gift-coins').value = item.trigger?.minCoins || 1;
-      document.getElementById('form-like-count').value = item.trigger?.likeCount || 50;
-      document.getElementById('form-chat-keyword').value = item.trigger?.chatKeyword || '';
-      document.getElementById('form-action-title').value = item.action?.title || '';
-      document.getElementById('form-action-msg').value = item.action?.message || '';
-      const mediaVal = item.action?.media || item.action?.videoUrl || '';
-      document.getElementById('form-media-url').value = mediaVal;
-      document.getElementById('form-sfx').value = item.action?.sfx || 'bell';
-      setDurationSeconds(item.action?.duration || 10);
-      document.getElementById('form-tts').checked = !!item.action?.tts;
-      if (document.getElementById('form-jj-effects')) {
-        document.getElementById('form-jj-effects').checked = item.action?.flash !== false;
-      }
-      if (document.getElementById('form-auto-end')) {
-        document.getElementById('form-auto-end').checked = item.action?.autoEnd !== false;
-      }
-      if (item.action?.key) document.getElementById('form-keystroke-key').value = item.action.key;
-      onCategoryChange();
-      onTriggerTypeChange();
-      loadAssetsList();
-      updateVideoPreview(mediaVal);
-      document.getElementById('interaction-modal').classList.add('show');
-    }
-
-    function closeModal() {
-      document.getElementById('interaction-modal').classList.remove('show');
-    }
-
-    function onCategoryChange() {
-      const cat = document.getElementById('form-category').value;
-      const groupAlert = document.getElementById('group-action-alert');
-      const groupKey = document.getElementById('group-action-keystroke');
-      const groupJJ = document.getElementById('group-jj-presets');
-      const rowJJFx = document.getElementById('row-jj-fx');
-      const labelMedia = document.getElementById('label-media-url');
-
-      if (cat === 'keystroke') {
-        groupAlert.style.display = 'none';
-        groupKey.style.display = 'flex';
-      } else {
-        groupAlert.style.display = 'flex';
-        groupKey.style.display = 'none';
-
-        if (cat === 'jj') {
-          if (labelMedia) labelMedia.innerText = '🎬 Video Alert / Jedag-Jedug dari Kita';
-          if (groupJJ) groupJJ.style.display = 'flex';
-          if (rowJJFx) rowJJFx.style.display = 'flex';
-          document.getElementById('form-sfx').value = 'jj_beat';
-        } else {
-          if (labelMedia) labelMedia.innerText = 'URL Gambar / Video Alert';
-          if (groupJJ) groupJJ.style.display = 'none';
-          if (rowJJFx) rowJJFx.style.display = 'none';
-        }
-      }
-    }
-
-    function onTriggerTypeChange() {
-      const t = document.getElementById('form-trigger-type').value;
-      document.getElementById('group-trigger-gift').style.display = (t === 'gift') ? 'grid' : 'none';
-      document.getElementById('group-trigger-like').style.display = (t === 'like') ? 'flex' : 'none';
-      document.getElementById('group-trigger-chat').style.display = (t === 'chat') ? 'flex' : 'none';
-    }
-
-    async function saveInteractionForm() {
-      const id = document.getElementById('modal-inter-id').value;
-      const name = document.getElementById('form-name').value.trim();
-      if (!name) return alert('Nama interaksi wajib diisi!');
-
-      const category = document.getElementById('form-category').value;
-      const triggerType = document.getElementById('form-trigger-type').value;
-
-      const trigger = { type: triggerType };
-      if (triggerType === 'gift') {
-        trigger.giftName = document.getElementById('form-gift-name').value.trim() || 'any';
-        trigger.minCoins = parseInt(document.getElementById('form-gift-coins').value, 10) || 1;
-      }
-      if (triggerType === 'like') trigger.likeCount = parseInt(document.getElementById('form-like-count').value, 10) || 50;
-      if (triggerType === 'chat') trigger.chatKeyword = document.getElementById('form-chat-keyword').value.trim() || '!jump';
-
-      const mediaUrl = document.getElementById('form-media-url').value.trim();
-      const hasJJFx = document.getElementById('form-jj-effects') ? document.getElementById('form-jj-effects').checked : true;
-      const durationVal = parseInt(document.getElementById('form-duration').value, 10) || 10;
-      const autoEndVal = document.getElementById('form-auto-end') ? document.getElementById('form-auto-end').checked : true;
-
-      const action = {
-        type: category,
-        title: document.getElementById('form-action-title').value.trim(),
-        message: document.getElementById('form-action-msg').value.trim(),
-        media: mediaUrl,
-        videoUrl: mediaUrl,
-        sfx: document.getElementById('form-sfx').value,
-        duration: durationVal,
-        autoEnd: autoEndVal,
-        flash: hasJJFx,
-        shake: hasJJFx,
-        tts: document.getElementById('form-tts').checked,
-        key: document.getElementById('form-keystroke-key').value
+      // Open Edit Modal
+      const handleOpenEdit = (item) => {
+        setEditingItem(item);
+        setFormName(item.name || '');
+        setFormCategory(item.category || 'jj');
+        setFormTriggerType(item.trigger?.type || 'gift');
+        setFormGiftName(item.trigger?.giftName || 'any');
+        setFormGiftCoins(item.trigger?.minCoins || 20);
+        setFormLikeCount(item.trigger?.likeCount || 50);
+        setFormChatKeyword(item.trigger?.chatKeyword || '!hype');
+        setFormTitle(item.action?.title || '');
+        setFormMsg(item.action?.message || '');
+        setFormMediaUrl(item.action?.media || item.action?.videoUrl || '/assets/jj_baru_2.mp4');
+        setFormDuration(item.action?.duration || 10);
+        setFormAutoEnd(item.action?.autoEnd !== false);
+        setFormSfx(item.action?.sfx || 'none');
+        setFormTts(!!item.action?.tts);
+        setFormKeystroke(item.action?.key || 'SPACE');
+        setIsModalOpen(true);
       };
 
-      const interactionObj = {
-        id: id || undefined,
-        name,
-        category,
-        trigger,
-        action,
-        enabled: true
+      const handleOpenCreate = () => {
+        setEditingItem(null);
+        setFormName('');
+        setFormCategory('jj');
+        setFormTriggerType('gift');
+        setFormGiftName('any');
+        setFormGiftCoins(20);
+        setFormLikeCount(50);
+        setFormChatKeyword('!hype');
+        setFormTitle('🔥 SULTAN ALERT: @{user}! 🔥');
+        setFormMsg('Mengirim {count}x {gift} bernilai {coins} Koin!');
+        setFormMediaUrl('/assets/jj_baru_2.mp4');
+        setFormDuration(10);
+        setFormAutoEnd(true);
+        setFormSfx('none');
+        setFormTts(false);
+        setFormKeystroke('SPACE');
+        setIsModalOpen(true);
       };
 
-      try {
-        await fetch('/api/interactions/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ interaction: interactionObj })
-        });
-        closeModal();
-        loadInteractions();
-      } catch(e) {
-        alert('Gagal menyimpan: ' + e.message);
-      }
-    }
-
-    // Music Player Helpers
-    async function skipTrack() {
-      await fetch('/api/skip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'Host', isModerator: true }) });
-    }
-
-    async function revokeTrack() {
-      await fetch('/api/revoke', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'Host' }) });
-    }
-
-    async function clearSongQueue() {
-      if (!confirm('Kosongkan antrean lagu?')) return;
-      await fetch('/api/clear', { method: 'POST' });
-    }
-
-    async function manualRequestSong() {
-      const input = document.getElementById('manual-song');
-      const query = input.value.trim();
-      if (!query) return;
-      input.value = '';
-      await fetch('/api/request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, user: 'Streamer (Host)' }) });
-    }
-
-    // Sync status TikTok & Music Loop
-    async function syncAppStatus() {
-      try {
-        const res = await fetch('/api/status');
-        if (!res.ok) return;
-        const data = await res.json();
-
-        // Topbar Status
-        const dot = document.getElementById('top-dot');
-        const userLabel = document.getElementById('top-username');
-        if (data.tiktokConnected) {
-          dot.className = 'status-dot connected';
-          userLabel.innerText = '@' + data.tiktokUsername + ' (LIVE 🟢)';
-        } else {
-          dot.className = 'status-dot';
-          userLabel.innerText = '@' + (data.tiktokUsername || 'xolt.san') + ' (Offline)';
+      const handleSaveInteraction = async () => {
+        if (!formName.trim()) {
+          showToast('Nama interaksi wajib diisi!', 'error');
+          return;
         }
 
-        // Music Now Playing
-        if (data.nowPlaying) {
-          document.getElementById('music-title').innerText = data.nowPlaying.title;
-          document.getElementById('music-artist').innerText = data.nowPlaying.artist;
-          if (data.nowPlaying.thumbnail) document.getElementById('music-thumb').src = data.nowPlaying.thumbnail;
-          document.getElementById('music-badge').innerText = data.nowPlaying.requestedBy ? 'Requested by: @' + data.nowPlaying.requestedBy : '';
-        } else {
-          document.getElementById('music-title').innerText = 'Tidak ada lagu dimainkan';
-          document.getElementById('music-artist').innerText = 'Antrean kosong';
-          document.getElementById('music-badge').innerText = '';
+        const trigger = { type: formTriggerType };
+        if (formTriggerType === 'gift') {
+          trigger.giftName = formGiftName.trim() || 'any';
+          trigger.minCoins = parseInt(formGiftCoins, 10) || 1;
+        } else if (formTriggerType === 'like') {
+          trigger.likeCount = parseInt(formLikeCount, 10) || 50;
+        } else if (formTriggerType === 'chat') {
+          trigger.chatKeyword = formChatKeyword.trim() || '!hype';
         }
 
-        // Music Queue
-        document.getElementById('music-queue-count').innerText = data.queue.length;
-        const qList = document.getElementById('music-queue-list');
-        if (data.queue.length === 0) {
-          qList.innerHTML = '<div style="color:#64748b; font-size:12.5px; text-align:center; padding: 20px;">Antrean masih kosong. Komen !play [lagu] di live!</div>';
-        } else {
-          qList.innerHTML = data.queue.map((item, idx) => `
-            <div style="background: var(--card-inner); padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-              <span style="font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${idx + 1}. ${item.title}</span>
-              <span style="font-size: 11px; color: #38bdf8;">@${item.requestedBy || 'Viewer'}</span>
-            </div>
-          `).join('');
-        }
+        const action = {
+          type: formCategory,
+          title: formTitle.trim(),
+          message: formMsg.trim(),
+          media: formMediaUrl.trim(),
+          videoUrl: formMediaUrl.trim(),
+          sfx: formSfx,
+          duration: parseInt(formDuration, 10) || 10,
+          autoEnd: formAutoEnd,
+          tts: formTts,
+          flash: false,
+          shake: false,
+          key: formKeystroke
+        };
 
-        // Chat Log
-        if (data.chatLogs) {
-          const chatLogEl = document.getElementById('logs-chat-container');
-          if (chatLogEl) {
-            chatLogEl.innerHTML = data.chatLogs.map(c => `
-              <div style="background: var(--card-inner); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-                <span style="color: #38bdf8; font-weight: 700;">@${c.user}:</span> <span>${c.message}</span>
-              </div>
-            `).join('');
+        const payload = {
+          id: editingItem ? editingItem.id : undefined,
+          name: formName.trim(),
+          category: formCategory,
+          trigger,
+          action,
+          enabled: editingItem ? editingItem.enabled : true
+        };
+
+        try {
+          await fetch('/api/interactions/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ interaction: payload })
+          });
+          showToast('Interaksi berhasil disimpan!', 'success');
+          setIsModalOpen(false);
+          fetchInteractions();
+        } catch (e) {
+          showToast('Gagal menyimpan interaksi', 'error');
+        }
+      };
+
+      const handleToggleInteraction = async (id, currentEnabled) => {
+        try {
+          await fetch('/api/interactions/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, enabled: !currentEnabled })
+          });
+          setInteractions(prev => prev.map(item => item.id === id ? { ...item, enabled: !currentEnabled } : item));
+        } catch (e) {
+          showToast('Gagal mengubah status', 'error');
+        }
+      };
+
+      const handleDeleteInteraction = async (id) => {
+        if (!confirm('Yakin ingin menghapus interaksi ini?')) return;
+        try {
+          await fetch('/api/interactions/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+          showToast('Interaksi dihapus', 'success');
+          fetchInteractions();
+        } catch (e) {
+          showToast('Gagal menghapus interaksi', 'error');
+        }
+      };
+
+      const handleTestInteraction = async (id) => {
+        try {
+          const res = await fetch('/api/interactions/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, user: 'Tester_Interaksi' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('Alert uji coba berhasil dikirim ke overlay!', 'success');
           }
+        } catch (e) {
+          showToast('Gagal menguji interaksi', 'error');
         }
+      };
 
-      } catch(e) {}
+      const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+          const res = await fetch(`/api/upload/video?filename=${encodeURIComponent(file.name)}`, {
+            method: 'POST',
+            body: file
+          });
+          const data = await res.json();
+          if (data.success) {
+            setFormMediaUrl(data.url);
+            showToast(`Video ${data.filename} berhasil diunggah!`, 'success');
+            fetchAssets();
+          }
+        } catch (err) {
+          showToast('Gagal mengunggah video', 'error');
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      const handleMasterSwitch = async (key, val) => {
+        try {
+          await fetch('/api/interactions/master-switch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, value: val })
+          });
+          fetchStatus();
+        } catch (e) {
+          showToast('Gagal mengubah sakelar master', 'error');
+        }
+      };
+
+      const copyObsUrl = () => {
+        const url = `${window.location.origin}/overlay`;
+        navigator.clipboard.writeText(url);
+        showToast('Tautan OBS disalin ke clipboard!', 'success');
+      };
+
+      // Filtered interactions
+      const filteredInteractions = interactions.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.trigger?.giftName || '').toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      const masterSwitches = status?.masterSwitches || {};
+
+      return (
+        <div className="flex min-h-screen bg-background">
+          {/* Mobile Sidebar Backdrop */}
+          {mobileMenuOpen && (
+            <div
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          )}
+
+          {/* ============================================================
+              SIDEBAR NAVIGATION (INDOFINITY STYLE)
+              ============================================================ */}
+          <aside
+            className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-card transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+              mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            {/* Brand Header */}
+            <div className="flex h-16 items-center justify-between border-b border-border px-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-accent to-pink-500 font-bold text-white shadow-md">
+                  <Icon name="zap" size={20} />
+                </div>
+                <div>
+                  <span className="text-base font-extrabold tracking-tight text-foreground">AmbaFinity</span>
+                  <span className="block text-[10px] font-medium text-muted-foreground">TikTok Live Hub</span>
+                </div>
+              </div>
+              <button
+                className="lg:hidden text-muted-foreground hover:text-foreground cursor-pointer"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Tutup menu"
+              >
+                <Icon name="x" size={20} />
+              </button>
+            </div>
+
+            {/* Stream Preset Dropdown */}
+            <div className="border-b border-border px-6 py-4">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Preset Stream
+              </label>
+              <select
+                value={activePreset}
+                onChange={(e) => {
+                  setActivePreset(e.target.value);
+                  showToast(`Preset diubah ke ${e.target.value}`, 'info');
+                }}
+                className="mt-1.5 w-full rounded-md border border-border bg-card-inner px-3 py-2 text-xs font-semibold text-foreground focus-visible:ring-1 focus-visible:ring-primary cursor-pointer"
+              >
+                <option value="default">default</option>
+                <option value="chill-stream">chill-stream</option>
+                <option value="gaming-rage">gaming-rage</option>
+                <option value="music-focus">music-focus</option>
+              </select>
+            </div>
+
+            {/* Navigation Links */}
+            <nav className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
+              <div>
+                <span className="px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Setup & Pusat Aksi
+                </span>
+                <div className="mt-2 space-y-1">
+                  <button
+                    onClick={() => { setActiveTab('pusat-interaksi'); setMobileMenuOpen(false); }}
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors cursor-pointer ${
+                      activeTab === 'pusat-interaksi'
+                        ? 'bg-primary/10 text-primary border border-primary/20'
+                        : 'text-muted-foreground hover:bg-slate-800/60 hover:text-foreground'
+                    }`}
+                  >
+                    <Icon name="zap" size={16} />
+                    <span>Pusat Interaksi</span>
+                    <span className="ml-auto rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-muted-foreground">
+                      {interactions.length}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('music-hub'); setMobileMenuOpen(false); }}
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors cursor-pointer ${
+                      activeTab === 'music-hub'
+                        ? 'bg-primary/10 text-primary border border-primary/20'
+                        : 'text-muted-foreground hover:bg-slate-800/60 hover:text-foreground'
+                    }`}
+                  >
+                    <Icon name="music" size={16} />
+                    <span>Music Request & Vinyl</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('simulator'); setMobileMenuOpen(false); }}
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors cursor-pointer ${
+                      activeTab === 'simulator'
+                        ? 'bg-primary/10 text-primary border border-primary/20'
+                        : 'text-muted-foreground hover:bg-slate-800/60 hover:text-foreground'
+                    }`}
+                  >
+                    <Icon name="flask" size={16} />
+                    <span>Simulator Event Live</span>
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('logs'); setMobileMenuOpen(false); }}
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors cursor-pointer ${
+                      activeTab === 'logs'
+                        ? 'bg-primary/10 text-primary border border-primary/20'
+                        : 'text-muted-foreground hover:bg-slate-800/60 hover:text-foreground'
+                    }`}
+                  >
+                    <Icon name="activity" size={16} />
+                    <span>Log Aktivitas</span>
+                  </button>
+                </div>
+              </div>
+            </nav>
+
+            {/* Bottom OBS Link Actions */}
+            <div className="border-t border-border p-4 space-y-2">
+              <button
+                onClick={copyObsUrl}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card-inner py-2 text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-slate-600 transition-colors cursor-pointer"
+              >
+                <Icon name="copy" size={14} />
+                <span>Salin Link Overlay OBS</span>
+              </button>
+              <a
+                href="/overlay"
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary/10 border border-primary/30 py-2 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
+              >
+                <Icon name="externalLink" size={14} />
+                <span>Buka Overlay di Tab Baru</span>
+              </a>
+            </div>
+          </aside>
+
+          {/* ============================================================
+              MAIN CONTENT CONTAINER
+              ============================================================ */}
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {/* Topbar Header */}
+            <header className="flex h-16 items-center justify-between border-b border-border bg-card/60 px-6 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="Buka navigasi"
+                  className="rounded-lg border border-border p-2 text-muted-foreground hover:text-foreground lg:hidden cursor-pointer"
+                >
+                  <Icon name="menu" size={18} />
+                </button>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      status?.tiktokConnected ? 'bg-success animate-pulse' : 'bg-slate-500'
+                    }`}
+                  />
+                  <span className="text-xs font-bold text-foreground">
+                    @{status?.tiktokUsername || 'xolt.san'}
+                  </span>
+                  <span className="rounded-md bg-card-inner px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                    {status?.tiktokConnected ? 'Live Terhubung' : 'Offline'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="hidden sm:inline-block text-xs font-medium text-muted-foreground">
+                  Port: <strong>3456</strong>
+                </span>
+                <button
+                  onClick={copyObsUrl}
+                  className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary-hover transition-colors cursor-pointer"
+                >
+                  <Icon name="tv" size={14} />
+                  <span>Overlay Link</span>
+                </button>
+              </div>
+            </header>
+
+            {/* Scrollable Page Views */}
+            <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+              
+              {/* ========================================================
+                  TAB 1: PUSAT INTERAKSI (PERSIS SCREENSHOT INDOFINITY)
+                  ======================================================== */}
+              {activeTab === 'pusat-interaksi' && (
+                <div className="space-y-6">
+                  {/* Page Title & Description */}
+                  <div>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Pusat Interaksi</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Kelola dan respons aktivitas live TikTok secara otomatis: jedag-jedug video alert, suara SFX, TTS pembaca gift, hingga keystroke otomatis.
+                    </p>
+                  </div>
+
+                  {/* OBS Notice Banner */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-accent/40 bg-accent/5 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/20 text-accent">
+                        <Icon name="tv" size={20} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground">Overlay Browser Source Siap Digunakan</h4>
+                        <p className="text-xs text-muted-foreground">
+                          Tambahkan URL Browser Source di OBS Studio agar efek video JJ dan alert muncul langsung di siaran live.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={copyObsUrl}
+                      className="shrink-0 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-card-inner transition-colors cursor-pointer"
+                    >
+                      Buka Link Overlay
+                    </button>
+                  </div>
+
+                  {/* Master Switches Bar */}
+                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-center gap-2.5">
+                      <Switch
+                        checked={masterSwitches.allInteractions !== false}
+                        onChange={(v) => handleMasterSwitch('allInteractions', v)}
+                        label="Semua Interaksi"
+                      />
+                      <span className="text-xs font-bold text-foreground">Semua Interaksi</span>
+                    </div>
+
+                    <div className="h-4 w-px bg-border hidden sm:block" />
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={masterSwitches.keystroke !== false}
+                        onChange={(v) => handleMasterSwitch('keystroke', v)}
+                        label="Keystroke"
+                      />
+                      <span className="text-xs font-medium text-muted-foreground">Keystroke</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={masterSwitches.spinRoulette !== false}
+                        onChange={(v) => handleMasterSwitch('spinRoulette', v)}
+                        label="Spin Roulette"
+                      />
+                      <span className="text-xs font-medium text-muted-foreground">Roulette</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={masterSwitches.obs !== false}
+                        onChange={(v) => handleMasterSwitch('obs', v)}
+                        label="OBS"
+                      />
+                      <span className="text-xs font-medium text-muted-foreground">OBS</span>
+                    </div>
+                  </div>
+
+                  {/* Actions Bar: Search, Counter & Add Button */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-lg bg-accent/15 border border-accent/30 px-3 py-1.5 text-xs font-extrabold text-accent">
+                        Interaksi {filteredInteractions.length}
+                      </span>
+                      <div className="relative flex-1 sm:w-64">
+                        <Icon name="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Cari Nama Interaksi..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full rounded-lg border border-border bg-card pl-9 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleOpenCreate}
+                      className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm transition-colors cursor-pointer"
+                    >
+                      <Icon name="plus" size={16} />
+                      <span>+ Interaksi Baru</span>
+                    </button>
+                  </div>
+
+                  {/* Interactions List / Cards */}
+                  {loading ? (
+                    /* Skeleton Loading State (R-27) */
+                    <div className="space-y-3">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="h-20 w-full animate-pulse rounded-xl border border-border bg-card/50" />
+                      ))}
+                    </div>
+                  ) : filteredInteractions.length === 0 ? (
+                    /* Empty State (R-27) */
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-12 text-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-card-inner text-muted-foreground">
+                        <Icon name="zap" size={24} />
+                      </div>
+                      <h3 className="mt-3 text-sm font-bold text-foreground">Belum Ada Interaksi</h3>
+                      <p className="mt-1 text-xs text-muted-foreground max-w-sm">
+                        Buat interaksi baru dengan klik tombol "+ Interaksi Baru" di atas untuk menambahkan alert video jedag-jedug atau pop-up.
+                      </p>
+                      <button
+                        onClick={handleOpenCreate}
+                        className="mt-4 rounded-lg bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground hover:bg-primary-hover transition-colors cursor-pointer"
+                      >
+                        + Tambah Sekarang
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {filteredInteractions.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-slate-600"
+                        >
+                          <div className="flex items-start gap-3.5">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card-inner border border-border text-primary font-bold">
+                              {item.category === 'jj' ? <Icon name="video" size={20} className="text-pink-500" /> : <Icon name="zap" size={20} />}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-extrabold text-foreground">{item.name}</h3>
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                  item.category === 'jj'
+                                    ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20'
+                                    : 'bg-primary/10 text-primary border border-primary/20'
+                                }`}>
+                                  {item.category === 'jj' ? 'Video Alert JJ' : item.category}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                Trigger: <strong className="text-foreground">{item.trigger?.type}</strong>{' '}
+                                {item.trigger?.type === 'gift' && `(${item.trigger?.giftName || 'any'} min ${item.trigger?.minCoins || 1} koin)`}
+                                {item.trigger?.type === 'like' && `(${item.trigger?.likeCount || 50}x like)`}
+                                {item.trigger?.type === 'chat' && `(${item.trigger?.chatKeyword || ''})`}
+                                {' • '}
+                                Durasi: <strong className="text-foreground">{item.action?.duration || 10}s</strong>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 self-end sm:self-center">
+                            <button
+                              onClick={() => handleTestInteraction(item.id)}
+                              className="rounded-lg border border-border bg-card-inner px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-slate-700 transition-colors cursor-pointer"
+                            >
+                              🧪 Test
+                            </button>
+                            <button
+                              onClick={() => handleOpenEdit(item)}
+                              aria-label={`Edit ${item.name}`}
+                              className="rounded-lg border border-border bg-card-inner p-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                            >
+                              <Icon name="edit" size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteInteraction(item.id)}
+                              aria-label={`Hapus ${item.name}`}
+                              className="rounded-lg border border-border bg-card-inner p-1.5 text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                            >
+                              <Icon name="trash" size={16} />
+                            </button>
+                            <Switch
+                              checked={item.enabled !== false}
+                              onChange={() => handleToggleInteraction(item.id, item.enabled)}
+                              ariaLabel={`Aktifkan atau nonaktifkan ${item.name}`}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ========================================================
+                  TAB 2: MUSIC REQUEST & VINYL HUB
+                  ======================================================== */}
+              {activeTab === 'music-hub' && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Music Request & Vinyl</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Kelola antrean musik otomatis dan pemutar piringan vinyl overlay.
+                    </p>
+                  </div>
+
+                  {/* Now Playing Card */}
+                  <div className="rounded-xl border border-border bg-card p-6">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Sedang Memutar (Now Playing)
+                    </span>
+                    {status?.nowPlaying ? (
+                      <div className="mt-4 flex flex-col sm:flex-row items-center gap-4">
+                        <img
+                          src={status.nowPlaying.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150'}
+                          alt={status.nowPlaying.title}
+                          className="h-20 w-20 rounded-xl object-cover shadow-md"
+                        />
+                        <div className="flex-1 text-center sm:text-left">
+                          <h2 className="text-lg font-bold text-foreground">{status.nowPlaying.title}</h2>
+                          <p className="text-sm text-muted-foreground">{status.nowPlaying.artist}</p>
+                          <span className="mt-1 inline-block rounded bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                            Req: @{status.nowPlaying.requestedBy || 'Host'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            await fetch('/api/skip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'Host', isModerator: true }) });
+                            showToast('Lagu dilewati!', 'success');
+                            fetchStatus();
+                          }}
+                          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary-hover transition-colors cursor-pointer"
+                        >
+                          <Icon name="skipForward" size={16} />
+                          <span>Lewati (Skip)</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-4 rounded-lg bg-card-inner p-4 text-center text-xs text-muted-foreground">
+                        Tidak ada lagu yang sedang diputar. Gunakan form di bawah atau kirim pesan <strong>!play [lagu]</strong> di chat.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Manual Song Request Box */}
+                  <div className="rounded-xl border border-border bg-card p-6 space-y-3">
+                    <h3 className="text-sm font-bold text-foreground">Request Lagu Manual</h3>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        id="manual-song-input"
+                        placeholder="Ketik judul lagu atau artis..."
+                        className="flex-1 rounded-lg border border-border bg-card-inner px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary"
+                        onKeyDown={async (e) => {
+                          if (e.key === 'Enter') {
+                            const val = e.target.value.trim();
+                            if (!val) return;
+                            await fetch('/api/request', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ user: 'Host', query: val, isModerator: true })
+                            });
+                            e.target.value = '';
+                            showToast('Lagu ditambahkan ke antrean!', 'success');
+                            fetchStatus();
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={async () => {
+                          const el = document.getElementById('manual-song-input');
+                          const val = el ? el.value.trim() : '';
+                          if (!val) return;
+                          await fetch('/api/request', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user: 'Host', query: val, isModerator: true })
+                          });
+                          if (el) el.value = '';
+                          showToast('Lagu ditambahkan ke antrean!', 'success');
+                          fetchStatus();
+                        }}
+                        className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary-hover transition-colors cursor-pointer"
+                      >
+                        + Tambah
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Queue List */}
+                  <div className="rounded-xl border border-border bg-card p-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-foreground">
+                        Antrean Lagu ({status?.queue?.length || 0})
+                      </h3>
+                      {status?.queue?.length > 0 && (
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Kosongkan semua antrean lagu?')) return;
+                            await fetch('/api/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'Host', isModerator: true }) });
+                            showToast('Antrean dibersihkan', 'info');
+                            fetchStatus();
+                          }}
+                          className="text-xs text-destructive hover:underline cursor-pointer"
+                        >
+                          Kosongkan Antrean
+                        </button>
+                      )}
+                    </div>
+
+                    {!status?.queue || status.queue.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Antrean kosong.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {status.queue.map((song, idx) => (
+                          <div key={idx} className="flex items-center justify-between rounded-lg bg-card-inner p-3 border border-border">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-bold text-muted-foreground">#{idx + 1}</span>
+                              <div>
+                                <h4 className="text-xs font-bold text-foreground">{song.title}</h4>
+                                <span className="text-[11px] text-muted-foreground">Req: @{song.requestedBy || 'Viewer'}</span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={async () => {
+                                await fetch('/api/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ index: idx }) });
+                                showToast('Lagu dihapus dari antrean', 'info');
+                                fetchStatus();
+                              }}
+                              aria-label={`Hapus ${song.title}`}
+                              className="text-muted-foreground hover:text-destructive cursor-pointer"
+                            >
+                              <Icon name="trash" size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ========================================================
+                  TAB 3: SIMULATOR EVENT LIVE
+                  ======================================================== */}
+              {activeTab === 'simulator' && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Simulator Event TikTok Live</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Uji coba respons animasi, video alert, dan efek suara tanpa perlu siaran live asli.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <button
+                      onClick={async () => {
+                        await fetch('/api/interactions/simulate', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ eventType: 'gift', data: { giftName: 'Rose', diamonds: 1, repeatCount: 1 } })
+                        });
+                        showToast('Simulasi Gift Rose (1 Koin) dikirim!', 'success');
+                      }}
+                      className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-6 text-center hover:border-primary transition-colors cursor-pointer"
+                    >
+                      <Icon name="gift" size={28} className="text-pink-500" />
+                      <span className="text-sm font-bold text-foreground">Gift Rose (1 Koin)</span>
+                      <span className="text-xs text-muted-foreground">Uji alert kecil mawar</span>
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        await fetch('/api/interactions/simulate', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ eventType: 'gift', data: { giftName: 'Donat Hype', diamonds: 20, repeatCount: 1 } })
+                        });
+                        showToast('Simulasi Gift 20 Koin (Sultan JJ) dikirim!', 'success');
+                      }}
+                      className="flex flex-col items-center justify-center gap-2 rounded-xl border border-pink-500/40 bg-pink-500/5 p-6 text-center hover:border-pink-500 transition-colors cursor-pointer"
+                    >
+                      <Icon name="video" size={28} className="text-pink-400" />
+                      <span className="text-sm font-bold text-pink-300">Gift 20+ Koin (Jedag-Jedug)</span>
+                      <span className="text-xs text-muted-foreground">Trigger video alert frameless</span>
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        await fetch('/api/interactions/simulate', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ eventType: 'like', data: { likeCount: 50 } })
+                        });
+                        showToast('Simulasi 50x Like dikirim!', 'success');
+                      }}
+                      className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-6 text-center hover:border-primary transition-colors cursor-pointer"
+                    >
+                      <Icon name="heart" size={28} className="text-rose-500" />
+                      <span className="text-sm font-bold text-foreground">Tap-Tap Like (50x)</span>
+                      <span className="text-xs text-muted-foreground">Uji pemicu likes</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ========================================================
+                  TAB 4: LOG AKTIVITAS
+                  ======================================================== */}
+              {activeTab === 'logs' && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Log Aktivitas Live</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Riwayat interaksi yang baru saja dipicu di live stream.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-border bg-card p-6">
+                    {(!status?.recentAlertLogs || status.recentAlertLogs.length === 0) ? (
+                      <p className="text-xs text-muted-foreground">Belum ada riwayat aktivitas.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {status.recentAlertLogs.map((log, idx) => (
+                          <div key={idx} className="flex items-center justify-between rounded-lg bg-card-inner p-3 border border-border text-xs">
+                            <div className="flex items-center gap-3">
+                              <span className="font-bold text-primary">@{log.user}</span>
+                              <span className="text-foreground">{log.details || log.interactionName}</span>
+                            </div>
+                            <span className="text-[11px] text-muted-foreground">
+                              {new Date(log.time).toLocaleTimeString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+            </main>
+          </div>
+
+          {/* ============================================================
+              MODAL: TAMBAH / EDIT INTERAKSI (RADIX UI ACCESSIBILITY)
+              ============================================================ */}
+          {isModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-fade-in">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
+                className="flex max-h-[90vh] w-full max-w-xl flex-col rounded-2xl border border-border bg-card shadow-2xl overflow-hidden"
+              >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between border-b border-border px-6 py-4">
+                  <h3 id="modal-title" className="text-base font-extrabold text-foreground">
+                    {editingItem ? 'Edit Interaksi' : 'Tambah Interaksi Baru'}
+                  </h3>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    aria-label="Tutup modal"
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Icon name="x" size={18} />
+                  </button>
+                </div>
+
+                {/* Modal Form Scroll Area */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                  {/* Nama Interaksi */}
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground">Nama Interaksi</label>
+                    <input
+                      type="text"
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                      placeholder="Contoh: 🔥 SULTAN JEDAG-JEDUG (Gift 20+ Koin)"
+                      className="mt-1 w-full rounded-lg border border-border bg-card-inner px-3 py-2 text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary"
+                    />
+                  </div>
+
+                  {/* Kategori Aksi & Tipe Trigger */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground">Kategori Aksi</label>
+                      <select
+                        value={formCategory}
+                        onChange={(e) => setFormCategory(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-border bg-card-inner px-3 py-2 text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary cursor-pointer"
+                      >
+                        <option value="jj">🎬 Video Alert / Jedag-Jedug (Frameless)</option>
+                        <option value="alert">🔔 Pop-Up Alert Biasa</option>
+                        <option value="keystroke">⌨️ Keystroke Otomatis</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground">Pemicu (Trigger)</label>
+                      <select
+                        value={formTriggerType}
+                        onChange={(e) => setFormTriggerType(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-border bg-card-inner px-3 py-2 text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary cursor-pointer"
+                      >
+                        <option value="gift">🎁 Menerima Gift</option>
+                        <option value="like">❤️ Tap-Tap Layar (Likes)</option>
+                        <option value="chat">💬 Kata Kunci di Chat</option>
+                        <option value="follow">🌟 Follower Baru</option>
+                        <option value="share">🔄 Share Siaran</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Kondisi Trigger Spesifik */}
+                  {formTriggerType === 'gift' && (
+                    <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-card-inner/50 p-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-muted-foreground">Nama Gift</label>
+                        <input
+                          type="text"
+                          value={formGiftName}
+                          onChange={(e) => setFormGiftName(e.target.value)}
+                          placeholder="any (semua jenis gift) atau Rose"
+                          className="mt-1 w-full rounded border border-border bg-card-inner px-2 py-1.5 text-xs text-foreground"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-muted-foreground">Minimal Koin</label>
+                        <input
+                          type="number"
+                          value={formGiftCoins}
+                          onChange={(e) => setFormGiftCoins(e.target.value)}
+                          className="mt-1 w-full rounded border border-border bg-card-inner px-2 py-1.5 text-xs text-foreground font-bold text-primary"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pengaturan Video Asset & Durasi */}
+                  {formCategory === 'jj' && (
+                    <div className="space-y-3 rounded-xl border border-pink-500/20 bg-pink-500/5 p-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-extrabold text-pink-400">File Video dari Komputer</label>
+                        <label className="flex items-center gap-1.5 rounded bg-pink-500/20 border border-pink-500/40 px-2.5 py-1 text-[11px] font-bold text-pink-300 hover:bg-pink-500/30 transition-colors cursor-pointer">
+                          <Icon name="upload" size={13} />
+                          <span>{uploading ? 'Mengupload...' : 'Pilih File MP4...'}</span>
+                          <input type="file" accept="video/mp4,video/webm" onChange={handleFileUpload} className="hidden" />
+                        </label>
+                      </div>
+
+                      {/* Dropdown File Assets di Server */}
+                      {assetFiles.length > 0 && (
+                        <div>
+                          <label className="text-[11px] text-muted-foreground">Atau pilih video yang sudah diupload:</label>
+                          <select
+                            value={formMediaUrl}
+                            onChange={(e) => setFormMediaUrl(e.target.value)}
+                            className="mt-1 w-full rounded border border-border bg-card-inner px-2 py-1.5 text-xs text-foreground cursor-pointer"
+                          >
+                            {assetFiles.map(f => (
+                              <option key={f.url} value={f.url}>{f.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Video Preview */}
+                      {formMediaUrl && (
+                        <div className="rounded-lg border border-border bg-black/60 p-2">
+                          <video
+                            src={formMediaUrl}
+                            controls
+                            className="max-h-36 w-full rounded object-contain bg-black"
+                          />
+                        </div>
+                      )}
+
+                      {/* Pengaturan Durasi */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-muted-foreground">Durasi Ditampilkan di Layar</label>
+                          <span className="rounded bg-primary/20 px-2 py-0.5 text-xs font-bold text-primary">
+                            {formDuration} Detik
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="60"
+                          value={formDuration}
+                          onChange={(e) => setFormDuration(parseInt(e.target.value, 10))}
+                          className="mt-2 w-full accent-primary cursor-pointer"
+                        />
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {[5, 8, 10, 15, 20, 30].map(s => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setFormDuration(s)}
+                              className={`rounded border px-2 py-0.5 text-[10px] font-bold transition-colors cursor-pointer ${
+                                formDuration === s
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'border-border bg-card-inner text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              {s}s
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <input
+                          type="checkbox"
+                          id="modal-auto-end"
+                          checked={formAutoEnd}
+                          onChange={(e) => setFormAutoEnd(e.target.checked)}
+                          className="rounded accent-primary"
+                        />
+                        <label htmlFor="modal-auto-end" className="text-xs text-muted-foreground cursor-pointer">
+                          Selesai otomatis jika video asli habis sebelum durasi selesai
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Efek Suara (SFX) */}
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground">Efek Suara Tambahan (SFX)</label>
+                    <select
+                      value={formSfx}
+                      onChange={(e) => setFormSfx(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-border bg-card-inner px-3 py-2 text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary cursor-pointer"
+                    >
+                      <option value="none">🔇 Tidak Ada SFX (Gunakan Suara Asli Video)</option>
+                      <option value="jj_beat">⚡ Jedag-Jedug (DJ Bass Beat Drop)</option>
+                      <option value="bell">🔔 Bell / Chime</option>
+                      <option value="fanfare">🎺 Fanfare Kemenangan</option>
+                      <option value="pop">🫧 Pop Effect</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="flex items-center justify-end gap-3 border-t border-border px-6 py-4">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="rounded-lg border border-border bg-card-inner px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleSaveInteraction}
+                    className="rounded-lg bg-primary px-5 py-2 text-xs font-extrabold text-primary-foreground hover:bg-primary-hover transition-colors cursor-pointer"
+                  >
+                    Simpan Interaksi
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toast Notification Container */}
+          {toast && (
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+            />
+          )}
+        </div>
+      );
     }
 
-    loadInteractions();
-    setInterval(loadInteractions, 3000);
-    setInterval(syncAppStatus, 1000);
-    syncAppStatus();
+    // Render Root
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
