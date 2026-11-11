@@ -272,6 +272,20 @@ if (config.tiktokUsername) {
 // ============================================================================
 async function searchYouTube(query) {
   try {
+    // 1. Dukungan direct link YouTube jika user memasukkan URL
+    const urlMatch = query.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    if (urlMatch) {
+      const vid = urlMatch[1];
+      return {
+        id: vid,
+        title: query,
+        artist: 'YouTube Direct',
+        duration: '0:00',
+        thumbnail: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+        candidates: [{ id: vid, title: query, artist: 'YouTube Direct' }]
+      };
+    }
+
     const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query);
     const res = await fetch(url, {
       headers: {
@@ -279,8 +293,11 @@ async function searchYouTube(query) {
       }
     });
     const html = await res.text();
-    const match = html.match(/ytInitialData\s*=\s*({.+?});<\/script>/);
-    if (!match) return null;
+    const match = html.match(/ytInitialData\s*=\s*({.+?});<\/script>/) || html.match(/ytInitialData\s*=\s*({.+?});/);
+    if (!match) {
+      console.warn('[Search] ytInitialData tidak cocok dalam HTML YouTube (length:', html.length, ')');
+      return null;
+    }
 
     const data = JSON.parse(match[1]);
     const contents = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
@@ -945,6 +962,7 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/skip' && req.method === 'POST') {
     try {
       const data = await readJsonBody();
+      console.log(`[API /api/skip]: user=${data.user}, isMod=${data.isModerator}, reason=${data.reason}, error=${data.errorCode}`);
       const result = handleSkip(data.user || 'Host', data.isModerator || false);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result));

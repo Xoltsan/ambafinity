@@ -1216,7 +1216,7 @@
         fetch('/api/skip', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user: 'System', isModerator: true })
+          body: JSON.stringify({ user: 'System', isModerator: true, reason: 'ENDED' })
         }).catch(err => console.error(err));
       }
     }
@@ -1249,7 +1249,7 @@
       fetch('/api/skip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: 'System', isModerator: true })
+        body: JSON.stringify({ user: 'System', isModerator: true, reason: 'ERROR', errorCode: event.data, videoId: currentPlayingVideoId })
       }).catch(err => console.error(err));
     }
 
