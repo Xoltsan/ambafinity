@@ -51,6 +51,15 @@ if (fs.existsSync(configPath)) {
         spinRoulette: true
       };
     }
+    if (!config.overlayConfig) {
+      config.overlayConfig = {
+        pos: 'top-left',
+        x: 24,
+        y: 24,
+        scale: 1.0,
+        locked: false
+      };
+    }
   } catch (e) {
     console.error('[Config] Gagal membaca config.json:', e);
   }
@@ -757,7 +766,8 @@ const server = http.createServer(async (req, res) => {
       skipVotesNeeded: config.skipVotesNeeded || 2,
       masterSwitches: config.masterSwitches || {},
       interactionsCount: interactions.length,
-      recentAlertLogs: recentAlertLogs.slice(0, 15)
+      recentAlertLogs: recentAlertLogs.slice(0, 15),
+      overlayConfig: config.overlayConfig || {}
     }));
     return;
   }
@@ -1053,6 +1063,27 @@ const server = http.createServer(async (req, res) => {
       alerts: alertsToReturn,
       masterSwitches: config.masterSwitches || {}
     }));
+    return;
+  }
+
+  // 19. API Konfigurasi Posisi & Skala Overlay (/api/overlay/config)
+  if (pathname === '/api/overlay/config' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(config.overlayConfig || { pos: 'top-left', x: 24, y: 24, scale: 1.0, locked: false }));
+    return;
+  }
+
+  if (pathname === '/api/overlay/config' && req.method === 'POST') {
+    try {
+      const data = await readJsonBody();
+      config.overlayConfig = { ...(config.overlayConfig || {}), ...data };
+      saveConfig();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, overlayConfig: config.overlayConfig }));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
     return;
   }
 

@@ -653,6 +653,63 @@
           </div>
         </div>
 
+        <!-- Card Pengaturan Posisi & Tampilan Overlay OBS -->
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 22px;">📐</span>
+              <div>
+                <h4 style="font-size: 15px; font-weight: 800; color: #f8fafc;">Atur Posisi & Ukuran Overlay di Layar</h4>
+                <p style="font-size: 12px; color: var(--text-muted);">Pilih posisi cepat, geser slider, atau drag langsung widget di layar browser overlay!</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button class="btn btn-outline" style="font-size: 11.5px; padding: 5px 12px;" onclick="resetOverlayPosition()">🔄 Reset Posisi</button>
+            </div>
+          </div>
+
+          <!-- Preset Posisi 5 Arah -->
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-right: 6px;">Posisi Cepat:</span>
+            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('top-left')">↖️ Kiri Atas</button>
+            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('top-right')">↗️ Kanan Atas</button>
+            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('bottom-left')">↙️ Kiri Bawah</button>
+            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('bottom-right')">↘️ Kanan Bawah</button>
+            <button class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="setPresetPos('center')">⏺️ Tengah Layar</button>
+          </div>
+
+          <!-- Slider Posisi X, Y, dan Scale -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; background: var(--card-inner); padding: 14px; border-radius: 12px; border: 1px solid var(--card-border);">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span style="font-weight: 700; color: #38bdf8;">Horizontal (X):</span>
+                <span id="label-pos-x" style="color: #cbd5e1; font-weight: 700;">24 px</span>
+              </div>
+              <input type="range" id="slider-pos-x" min="0" max="1920" value="24" style="accent-color: #38bdf8; cursor: pointer;" oninput="onPositionSliderChange()">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span style="font-weight: 700; color: #f97316;">Vertikal (Y):</span>
+                <span id="label-pos-y" style="color: #cbd5e1; font-weight: 700;">24 px</span>
+              </div>
+              <input type="range" id="slider-pos-y" min="0" max="1080" value="24" style="accent-color: #f97316; cursor: pointer;" oninput="onPositionSliderChange()">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span style="font-weight: 700; color: #10b981;">Ukuran (Scale):</span>
+                <span id="label-pos-scale" style="color: #cbd5e1; font-weight: 700;">1.00x</span>
+              </div>
+              <input type="range" id="slider-pos-scale" min="0.5" max="2.0" step="0.05" value="1.0" style="accent-color: #10b981; cursor: pointer;" oninput="onPositionSliderChange()">
+            </div>
+          </div>
+
+          <div style="font-size: 11.5px; color: #64748b;">
+            💡 <b>Tips Geser Bebas:</b> Kamu juga bisa langsung <b>klik dan seret (drag & drop)</b> piringan vinyl di layar browser atau lewat fitur <i>Interact</i> di OBS Studio!
+          </div>
+        </div>
+
         <!-- Bar Sakelar Master (Master Switches) -->
         <div class="master-switches-bar">
           
@@ -1159,6 +1216,64 @@
       }
     }
 
+    // ============================================================
+    // PENGATURAN POSISI OVERLAY (PRESET & SLIDER)
+    // ============================================================
+    async function setPresetPos(preset) {
+      try {
+        await fetch('/api/overlay/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pos: preset })
+        });
+        loadOverlayConfig();
+      } catch(e) {}
+    }
+
+    async function onPositionSliderChange() {
+      const x = parseInt(document.getElementById('slider-pos-x').value, 10);
+      const y = parseInt(document.getElementById('slider-pos-y').value, 10);
+      const scale = parseFloat(document.getElementById('slider-pos-scale').value);
+
+      document.getElementById('label-pos-x').innerText = x + ' px';
+      document.getElementById('label-pos-y').innerText = y + ' px';
+      document.getElementById('label-pos-scale').innerText = scale.toFixed(2) + 'x';
+
+      try {
+        await fetch('/api/overlay/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pos: 'custom', x, y, scale })
+        });
+      } catch(e) {}
+    }
+
+    async function resetOverlayPosition() {
+      setPresetPos('top-left');
+      document.getElementById('slider-pos-scale').value = 1.0;
+      onPositionSliderChange();
+    }
+
+    async function loadOverlayConfig() {
+      try {
+        const res = await fetch('/api/overlay/config');
+        if (!res.ok) return;
+        const cfg = await res.json();
+        if (cfg.x !== undefined) {
+          document.getElementById('slider-pos-x').value = cfg.x;
+          document.getElementById('label-pos-x').innerText = cfg.x + ' px';
+        }
+        if (cfg.y !== undefined) {
+          document.getElementById('slider-pos-y').value = cfg.y;
+          document.getElementById('label-pos-y').innerText = cfg.y + ' px';
+        }
+        if (cfg.scale !== undefined) {
+          document.getElementById('slider-pos-scale').value = cfg.scale;
+          document.getElementById('label-pos-scale').innerText = Number(cfg.scale).toFixed(2) + 'x';
+        }
+      } catch(e) {}
+    }
+
     async function loadInteractions() {
       try {
         const res = await fetch('/api/interactions');
@@ -1177,6 +1292,7 @@
         if (currentMasterSwitches.spinRoulette !== undefined) document.getElementById('sw-spin').checked = currentMasterSwitches.spinRoulette;
 
         filterInteractions();
+        loadOverlayConfig();
 
         // Render Recent Alerts in Logs Tab
         if (data.recentAlertLogs) {

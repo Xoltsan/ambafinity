@@ -33,5 +33,12 @@
   "sessionId": "",
   "maxSongDurationMinutes": 8,
   "theme": "glass-blue",
-  "autoPlay": true
+  "autoPlay": true,
+  "overlayConfig": {
+    "pos": "top-left",
+    "x": 24,
+    "y": 24,
+    "scale": 1,
+    "locked": false
+  }
 }

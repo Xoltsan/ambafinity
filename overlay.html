@@ -57,20 +57,55 @@
       font-family: var(--font-family);
       overflow: hidden;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: flex-start;
-      padding: 24px;
       user-select: none;
+      position: relative;
     }
 
     .overlay-wrapper {
+      position: absolute;
+      left: 24px;
+      top: 24px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
       width: 440px;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: grab;
+      touch-action: none;
+      z-index: 100;
+      transition: box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    .overlay-wrapper.is-dragging {
+      cursor: grabbing !important;
+      opacity: 0.92;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      transition: none !important;
+    }
+
+    .drag-handle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      width: fit-content;
+      margin-left: 20px;
+      cursor: grab;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      opacity: 0.5;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .overlay-wrapper:hover .drag-handle,
+    .overlay-wrapper.is-dragging .drag-handle {
+      opacity: 1;
+      transform: translateY(-2px);
     }
 
     /* ============================================================
@@ -623,6 +658,12 @@
 
   <div class="overlay-wrapper" id="overlay-wrapper">
     
+    <!-- Drag Handle untuk menggeser posisi piringan vinyl secara bebas -->
+    <div class="drag-handle" id="drag-handle" title="Klik dan tahan untuk memindahkan posisi widget ini di layar">
+      <span>⋮⋮</span>
+      <span>Geser Posisi (Drag)</span>
+    </div>
+    
     <!-- 1. KARTU UTAMA: NOW PLAYING DENGAN PIRINGAN HITAM BERPUTAR -->
     <div class="now-playing-container playing" id="np-container">
       
@@ -738,8 +779,157 @@
     const urlParams = new URLSearchParams(window.location.search);
     const theme = urlParams.get('theme');
     if (theme) document.body.className = `theme-${theme}`;
-    const scale = urlParams.get('scale');
-    if (scale) document.getElementById('overlay-wrapper').style.transform = `scale(${scale})`;
+
+    // ============================================================
+    // SISTEM PENGATURAN POSISI & DRAG AND DROP BEBAS
+    // ============================================================
+    const wrapper = document.getElementById('overlay-wrapper');
+    const dragHandle = document.getElementById('drag-handle');
+
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let initialLeft = 24, initialTop = 24;
+    let currentScale = 1.0;
+    let overlayConfig = {
+      pos: 'top-left',
+      x: 24,
+      y: 24,
+      scale: 1.0,
+      locked: false
+    };
+
+    const urlPos = urlParams.get('pos');
+    const urlX = urlParams.get('x');
+    const urlY = urlParams.get('y');
+    const urlScale = urlParams.get('scale');
+
+    function applyPosition(config) {
+      if (isDragging) return;
+      overlayConfig = { ...overlayConfig, ...config };
+      currentScale = parseFloat(urlScale || config.scale || 1.0);
+
+      if (urlX !== null && urlY !== null) {
+        wrapper.style.left = parseInt(urlX, 10) + 'px';
+        wrapper.style.top = parseInt(urlY, 10) + 'px';
+        wrapper.style.right = 'auto';
+        wrapper.style.bottom = 'auto';
+        wrapper.style.transform = `scale(${currentScale})`;
+        return;
+      }
+
+      if (urlPos) {
+        applyPreset(urlPos);
+        return;
+      }
+
+      const pos = config.pos || 'top-left';
+      if (pos === 'custom') {
+        const x = (typeof config.x === 'number') ? config.x : 24;
+        const y = (typeof config.y === 'number') ? config.y : 24;
+        wrapper.style.left = x + 'px';
+        wrapper.style.top = y + 'px';
+        wrapper.style.right = 'auto';
+        wrapper.style.bottom = 'auto';
+        wrapper.style.transform = `scale(${currentScale})`;
+      } else {
+        applyPreset(pos);
+      }
+    }
+
+    function applyPreset(preset) {
+      wrapper.style.left = 'auto';
+      wrapper.style.right = 'auto';
+      wrapper.style.top = 'auto';
+      wrapper.style.bottom = 'auto';
+
+      if (preset === 'top-left') {
+        wrapper.style.left = '24px';
+        wrapper.style.top = '24px';
+        wrapper.style.transform = `scale(${currentScale})`;
+      } else if (preset === 'top-right') {
+        wrapper.style.right = '24px';
+        wrapper.style.top = '24px';
+        wrapper.style.transform = `scale(${currentScale})`;
+      } else if (preset === 'bottom-left') {
+        wrapper.style.left = '24px';
+        wrapper.style.bottom = '24px';
+        wrapper.style.transform = `scale(${currentScale})`;
+      } else if (preset === 'bottom-right') {
+        wrapper.style.right = '24px';
+        wrapper.style.bottom = '24px';
+        wrapper.style.transform = `scale(${currentScale})`;
+      } else if (preset === 'center') {
+        wrapper.style.left = '50%';
+        wrapper.style.top = '50%';
+        wrapper.style.transform = `translate(-50%, -50%) scale(${currentScale})`;
+      }
+    }
+
+    // Drag and Drop Logic
+    function startDrag(e) {
+      if (overlayConfig.locked) return;
+      isDragging = true;
+      wrapper.classList.add('is-dragging');
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = wrapper.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+      // Normalisasikan style ke left & top murni agar tidak terpengaruh right/bottom/translate
+      wrapper.style.transform = `scale(${currentScale})`;
+      wrapper.style.left = initialLeft + 'px';
+      wrapper.style.top = initialTop + 'px';
+      wrapper.style.right = 'auto';
+      wrapper.style.bottom = 'auto';
+      try { wrapper.setPointerCapture(e.pointerId); } catch(err) {}
+    }
+
+    function onDrag(e) {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      let newLeft = initialLeft + dx;
+      let newTop = initialTop + dy;
+
+      const maxLeft = window.innerWidth - wrapper.offsetWidth;
+      const maxTop = window.innerHeight - wrapper.offsetHeight;
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      wrapper.style.left = newLeft + 'px';
+      wrapper.style.top = newTop + 'px';
+      wrapper.style.right = 'auto';
+      wrapper.style.bottom = 'auto';
+    }
+
+    function stopDrag(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      wrapper.classList.remove('is-dragging');
+      try { wrapper.releasePointerCapture(e.pointerId); } catch(err) {}
+
+      const rect = wrapper.getBoundingClientRect();
+      const updated = {
+        pos: 'custom',
+        x: Math.round(rect.left),
+        y: Math.round(rect.top),
+        scale: currentScale
+      };
+
+      fetch('/api/overlay/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      }).catch(err => console.error(err));
+    }
+
+    wrapper.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button, a')) return;
+      startDrag(e);
+    });
+    window.addEventListener('pointermove', onDrag);
+    window.addEventListener('pointerup', stopDrag);
+    window.addEventListener('pointercancel', stopDrag);
 
     // Referensi Elemen DOM
     const npContainer = document.getElementById('np-container');
@@ -976,6 +1166,11 @@
         if (data.latestToast && data.latestToast !== window.lastToastId) {
           window.lastToastId = data.latestToast;
           showToast(data.latestToastMessage || 'Request baru diterima!');
+        }
+
+        // 4. Perbarui Posisi & Skala Overlay jika diatur dari server / dashboard
+        if (data.overlayConfig && !isDragging) {
+          applyPosition(data.overlayConfig);
         }
 
       } catch (err) {
