@@ -149,27 +149,34 @@ function triggerInteraction(interaction, eventData = {}) {
   const avatar = eventData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100';
   const action = interaction.action || {};
 
+  const diamonds = eventData.diamonds || (interaction.trigger?.minCoins || 1);
+
   const title = (action.title || '{user} memicu interaksi!')
     .replace(/{user}/g, user)
     .replace(/{gift}/g, eventData.giftName || 'Gift')
-    .replace(/{count}/g, eventData.count || 1);
+    .replace(/{count}/g, eventData.count || 1)
+    .replace(/{coins}/g, diamonds);
 
   const message = (action.message || '')
     .replace(/{user}/g, user)
     .replace(/{gift}/g, eventData.giftName || 'Gift')
-    .replace(/{count}/g, eventData.count || 1);
+    .replace(/{count}/g, eventData.count || 1)
+    .replace(/{coins}/g, diamonds);
 
   const ttsText = (action.ttsText || title)
     .replace(/{user}/g, user)
     .replace(/{gift}/g, eventData.giftName || 'Gift')
-    .replace(/{count}/g, eventData.count || 1);
+    .replace(/{count}/g, eventData.count || 1)
+    .replace(/{coins}/g, diamonds);
 
-  console.log(`[Pusat Interaksi] ⚡ "${interaction.name}" dipicu oleh @${user}`);
+  console.log(`[Pusat Interaksi] ⚡ "${interaction.name}" dipicu oleh @${user} (${diamonds} koin)`);
 
   // Eksekusi Keystroke jika ada
   if (action.type === 'keystroke' && action.key) {
     sendKeystroke(action.key);
   }
+
+  const alertType = action.type || (interaction.category === 'jj' ? 'jj' : 'alert');
 
   const alertItem = {
     id: 'alert-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
@@ -177,16 +184,20 @@ function triggerInteraction(interaction, eventData = {}) {
     interactionId: interaction.id,
     name: interaction.name,
     category: interaction.category,
-    type: action.type || 'alert',
+    type: alertType,
     user,
     avatar,
     title,
     message,
-    media: action.media || '',
-    sfx: action.sfx || 'bell',
+    media: action.media || action.videoUrl || '',
+    videoUrl: action.videoUrl || action.media || '',
+    sfx: action.sfx || (alertType === 'jj' ? 'jj_beat' : 'bell'),
+    flash: action.flash !== false,
+    shake: action.shake !== false,
+    diamonds: diamonds,
     tts: !!action.tts,
     ttsText: ttsText,
-    duration: action.duration || 5,
+    duration: action.duration || (alertType === 'jj' ? 9 : 5),
     options: action.options || []
   };
 
@@ -597,8 +608,9 @@ async function doConnectLive(conn, username) {
       const diamonds = data.diamondCount || 1;
       const repeatCount = data.repeatCount || 1;
       const avatar = data.user?.profilePictureUrls?.[0] || '';
+      const totalDiamonds = diamonds * repeatCount;
 
-      console.log(`[TikTok Gift] 🎁 @${user} mengirim ${repeatCount}x ${giftName} (${diamonds} koin)`);
+      console.log(`[TikTok Gift] 🎁 @${user} mengirim ${repeatCount}x ${giftName} (${totalDiamonds} total koin)`);
 
       for (const inter of interactions) {
         if (!inter.enabled || inter.trigger?.type !== 'gift') continue;
@@ -606,10 +618,10 @@ async function doConnectLive(conn, username) {
         const minCoins = inter.trigger.minCoins || 0;
 
         const matchesName = !reqGift || reqGift === 'semua gift' || reqGift === 'any' || giftName.toLowerCase().includes(reqGift);
-        const matchesCoins = diamonds >= minCoins;
+        const matchesCoins = totalDiamonds >= minCoins || diamonds >= minCoins;
 
         if (matchesName && matchesCoins) {
-          triggerInteraction(inter, { user, avatar, giftName, count: repeatCount, diamonds });
+          triggerInteraction(inter, { user, avatar, giftName, count: repeatCount, diamonds: totalDiamonds });
         }
       }
     });
@@ -733,6 +745,35 @@ const server = http.createServer(async (req, res) => {
       res.end(data);
     });
     return;
+  }
+
+  // 2b. Static File Asset (Video JJ / Audio / Gambar Kustom) (/assets/*)
+  if (pathname.startsWith('/assets/')) {
+    const safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+    const fullPath = path.join(__dirname, safePath);
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+      const ext = path.extname(fullPath).toLowerCase();
+      const mimeTypes = {
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.mp3': 'audio/mpeg',
+        '.wav': 'audio/wav',
+        '.ogg': 'audio/ogg',
+        '.gif': 'image/gif',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.webp': 'image/webp',
+        '.txt': 'text/plain'
+      };
+      const contentType = mimeTypes[ext] || 'application/octet-stream';
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Access-Control-Allow-Origin': '*'
+      });
+      fs.createReadStream(fullPath).pipe(res);
+      return;
+    }
   }
 
   async function readJsonBody() {
@@ -1017,13 +1058,18 @@ const server = http.createServer(async (req, res) => {
       const eventType = data.type || 'gift';
 
       if (eventType === 'gift') {
-        const giftName = data.giftName || 'Rose';
-        const diamonds = data.diamonds || 1;
+        const giftName = data.giftName || 'Gift';
+        const count = Number(data.count) || 1;
+        const diamonds = Number(data.diamonds) || 1;
+        const totalCoins = diamonds * count;
         for (const inter of interactions) {
           if (!inter.enabled || inter.trigger?.type !== 'gift') continue;
           const reqGift = (inter.trigger.giftName || '').toLowerCase().trim();
-          if (!reqGift || reqGift === 'semua gift' || reqGift === 'any' || giftName.toLowerCase().includes(reqGift)) {
-            triggerInteraction(inter, { user, giftName, count: 1, diamonds });
+          const minCoins = Number(inter.trigger.minCoins) || 0;
+          const matchesName = !reqGift || reqGift === 'semua gift' || reqGift === 'any' || giftName.toLowerCase().includes(reqGift);
+          const matchesCoins = totalCoins >= minCoins || diamonds >= minCoins;
+          if (matchesName && matchesCoins) {
+            triggerInteraction(inter, { user, giftName, count, diamonds: totalCoins });
           }
         }
       } else if (eventType === 'like') {

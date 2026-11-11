@@ -1,5 +1,29 @@
 [
   {
+    "id": "act-jj-20",
+    "name": "🔥 SULTAN JEDAG-JEDUG (Gift 20+ Koin)",
+    "enabled": true,
+    "category": "jj",
+    "trigger": {
+      "type": "gift",
+      "giftName": "any",
+      "minCoins": 20
+    },
+    "action": {
+      "type": "jj",
+      "title": "🔥 SULTAN ALERT: @{user}! 🔥",
+      "message": "Mengirim {count}x {gift} bernilai {coins} Koin! Mode Jedag-Jedug AKTIF!",
+      "media": "https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4",
+      "videoUrl": "https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4",
+      "sfx": "jj_beat",
+      "flash": true,
+      "shake": true,
+      "tts": true,
+      "ttsText": "Wah gila! Sultan {user} baru saja mengirim 20 koin! Jedag jedug menyala abangku!",
+      "duration": 9
+    }
+  },
+  {
     "id": "act-1",
     "name": "Mawar Cinta (Rose Alert & TTS)",
     "enabled": true,

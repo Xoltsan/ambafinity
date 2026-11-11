@@ -862,10 +862,15 @@
             <span style="font-weight: 700; font-size: 15px; color: #f43f5e;">🎁 Simulasi Gift TikTok</span>
             <p style="font-size: 12.5px; color: var(--text-muted);">Pilih jenis gift yang ingin disimulasikan:</p>
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button class="btn btn-orange" style="background: linear-gradient(90deg, #f43f5e, #8b5cf6); border: none; font-weight: 800; color: #fff; width: 100%; padding: 10px;" onclick="simEvent('gift', { giftName: 'Donat Hype', diamonds: 20 })">🔥 Kirim 20 Koin (Test Jedag-Jedug JJ Video Alert)</button>
               <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Rose', diamonds: 1 })">🌹 Gift Rose (1 Koin)</button>
               <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'TikTok', diamonds: 1 })">🎵 Gift TikTok</button>
               <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Whale', diamonds: 100 })">🐳 Gift Paus (100 Koin)</button>
-              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Donut', diamonds: 30 })">🍩 Gift Donat</button>
+              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Donut', diamonds: 30 })">🍩 Gift Donat (30 Koin)</button>
+              <div style="display: flex; gap: 8px; width: 100%; margin-top: 6px; align-items: center;">
+                <input type="number" id="sim-custom-coins" class="input-field" value="20" min="1" placeholder="Koin..." style="width: 100px; padding: 6px 10px;">
+                <button class="btn btn-outline" style="font-size: 12px; flex: 1;" onclick="simCustomCoins()">⚡ Tes Kustom Jumlah Koin</button>
+              </div>
             </div>
           </div>
 
@@ -945,6 +950,7 @@
           <label>Kategori Aksi</label>
           <select id="form-category" class="input-field" onchange="onCategoryChange()">
             <option value="alert">📺 Alert Visual & Suara</option>
+            <option value="jj">🎬 Video Alert / Jedag-Jedug (JJ)</option>
             <option value="keystroke">⌨️ Keystroke (Game Automation)</option>
             <option value="spin">🎡 Spin Roulette (Roda)</option>
           </select>
@@ -962,9 +968,15 @@
         </div>
       </div>
 
-      <div id="group-trigger-gift" class="form-group">
-        <label>Nama Gift TikTok</label>
-        <input type="text" id="form-gift-name" class="input-field" placeholder="Rose, TikTok, Whale, Donut (atau kosongkan untuk semua gift)">
+      <div id="group-trigger-gift" style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>Nama Gift TikTok</label>
+          <input type="text" id="form-gift-name" class="input-field" placeholder="Rose, TikTok, Whale, Donut (atau 'any' untuk semua gift)">
+        </div>
+        <div class="form-group">
+          <label>Minimal Koin</label>
+          <input type="number" id="form-gift-coins" class="input-field" value="1" min="1" placeholder="Contoh: 20">
+        </div>
       </div>
 
       <div id="group-trigger-like" class="form-group" style="display: none;">
@@ -989,14 +1001,21 @@
 
       <div id="group-action-alert" style="display: flex; flex-direction: column; gap: 12px;">
         <div class="form-group">
-          <label>URL Gambar / GIF Alert</label>
+          <label id="label-media-url">URL Gambar / Video Alert (MP4 / WebM / GIF)</label>
           <input type="text" id="form-media-url" class="input-field" value="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif">
+          <div id="group-jj-presets" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+            <span style="font-size: 11px; color: #94a3b8; width: 100%;">Pilihan Cepat Video Jedag-Jedug:</span>
+            <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4')">⚡ JJ Bass Hype (Default)</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif')">🌹 Mawar Pop</button>
+            <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('/assets/jj_sultan.mp4')">📁 File Lokal (/assets/jj_sultan.mp4)</button>
+          </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
             <label>Efek Suara (SFX)</label>
             <select id="form-sfx" class="input-field">
+              <option value="jj_beat">⚡ Jedag-Jedug (DJ Bass Beat Drop)</option>
               <option value="bell">🔔 Bell / Chime</option>
               <option value="fanfare">🎺 Fanfare Kemenangan</option>
               <option value="pop">🫧 Pop Effect</option>
@@ -1005,13 +1024,19 @@
           </div>
           <div class="form-group">
             <label>Durasi Tampil (Detik)</label>
-            <input type="number" id="form-duration" class="input-field" value="5" min="2" max="15">
+            <input type="number" id="form-duration" class="input-field" value="5" min="2" max="20">
           </div>
         </div>
 
-        <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 4px;">
-          <input type="checkbox" id="form-tts" checked style="width: 18px; height: 18px;">
-          <label for="form-tts" style="margin-bottom: 0; cursor: pointer;">Bacakan Suara TTS Otomatis (Bahasa Indonesia)</label>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+            <input type="checkbox" id="form-tts" checked style="width: 18px; height: 18px;">
+            <label for="form-tts" style="margin-bottom: 0; cursor: pointer;">Bacakan Suara TTS Otomatis (Bahasa Indonesia)</label>
+          </div>
+          <div id="row-jj-fx" class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+            <input type="checkbox" id="form-jj-effects" checked style="width: 18px; height: 18px;">
+            <label for="form-jj-effects" style="margin-bottom: 0; cursor: pointer;">Aktifkan Efek Flash Strobe & Screen Bass Shake</label>
+          </div>
         </div>
       </div>
 
@@ -1153,12 +1178,14 @@
       container.innerHTML = items.map(item => {
         const cat = item.category || 'alert';
         let icon = '📺';
+        if (cat === 'jj') icon = '🎬';
         if (cat === 'keystroke') icon = '⌨️';
         if (cat === 'spin') icon = '🎡';
 
         let triggerDesc = 'Pemicu: ' + (item.trigger?.type || 'gift').toUpperCase();
         if (item.trigger?.type === 'gift') {
-          triggerDesc = `🎁 Gift: ${item.trigger.giftName || 'Semua Gift'}`;
+          const minCoins = item.trigger.minCoins ? ` (${item.trigger.minCoins}+ Koin)` : '';
+          triggerDesc = `🎁 Gift: ${item.trigger.giftName || 'Semua Gift'}${minCoins}`;
         } else if (item.trigger?.type === 'like') {
           triggerDesc = `❤️ Like: ${item.trigger.likeCount || 50}x`;
         } else if (item.trigger?.type === 'chat') {
@@ -1166,6 +1193,7 @@
         }
 
         let actionDesc = 'Aksi: Alert Visual & SFX';
+        if (cat === 'jj') actionDesc = '🎬 Video Alert Jedag-Jedug (JJ)';
         if (cat === 'keystroke') actionDesc = `⌨️ Tekan [${item.action?.key || 'SPACE'}]`;
         if (cat === 'spin') actionDesc = `🎡 Spin Roda Roulette`;
 
@@ -1309,6 +1337,15 @@
       } catch(e) {}
     }
 
+    function setJJVideoPreset(url) {
+      document.getElementById('form-media-url').value = url;
+    }
+
+    async function simCustomCoins() {
+      const coins = parseInt(document.getElementById('sim-custom-coins').value, 10) || 20;
+      await simEvent('gift', { giftName: 'Donat Hype', diamonds: coins });
+    }
+
     // Modal Helpers
     function openCreateModal() {
       document.getElementById('modal-title').innerText = 'Tambah Interaksi Baru';
@@ -1316,13 +1353,17 @@
       document.getElementById('form-name').value = '';
       document.getElementById('form-category').value = 'alert';
       document.getElementById('form-trigger-type').value = 'gift';
-      document.getElementById('form-gift-name').value = 'Rose';
+      document.getElementById('form-gift-name').value = 'any';
+      document.getElementById('form-gift-coins').value = '1';
+      document.getElementById('form-like-count').value = '50';
+      document.getElementById('form-chat-keyword').value = '';
       document.getElementById('form-action-title').value = '{user} Mengirim {gift}! 🌹';
       document.getElementById('form-action-msg').value = 'Terima kasih banyak atas dukungannya!';
       document.getElementById('form-media-url').value = 'https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif';
       document.getElementById('form-sfx').value = 'bell';
       document.getElementById('form-duration').value = '5';
       document.getElementById('form-tts').checked = true;
+      if (document.getElementById('form-jj-effects')) document.getElementById('form-jj-effects').checked = true;
       onCategoryChange();
       onTriggerTypeChange();
       document.getElementById('interaction-modal').classList.add('show');
@@ -1337,14 +1378,18 @@
       document.getElementById('form-category').value = item.category || 'alert';
       document.getElementById('form-trigger-type').value = item.trigger?.type || 'gift';
       document.getElementById('form-gift-name').value = item.trigger?.giftName || '';
+      document.getElementById('form-gift-coins').value = item.trigger?.minCoins || 1;
       document.getElementById('form-like-count').value = item.trigger?.likeCount || 50;
       document.getElementById('form-chat-keyword').value = item.trigger?.chatKeyword || '';
       document.getElementById('form-action-title').value = item.action?.title || '';
       document.getElementById('form-action-msg').value = item.action?.message || '';
-      document.getElementById('form-media-url').value = item.action?.media || '';
+      document.getElementById('form-media-url').value = item.action?.media || item.action?.videoUrl || '';
       document.getElementById('form-sfx').value = item.action?.sfx || 'bell';
       document.getElementById('form-duration').value = item.action?.duration || 5;
       document.getElementById('form-tts').checked = !!item.action?.tts;
+      if (document.getElementById('form-jj-effects')) {
+        document.getElementById('form-jj-effects').checked = item.action?.flash !== false;
+      }
       if (item.action?.key) document.getElementById('form-keystroke-key').value = item.action.key;
       onCategoryChange();
       onTriggerTypeChange();
@@ -1359,18 +1404,41 @@
       const cat = document.getElementById('form-category').value;
       const groupAlert = document.getElementById('group-action-alert');
       const groupKey = document.getElementById('group-action-keystroke');
+      const groupJJ = document.getElementById('group-jj-presets');
+      const rowJJFx = document.getElementById('row-jj-fx');
+      const labelMedia = document.getElementById('label-media-url');
+
       if (cat === 'keystroke') {
         groupAlert.style.display = 'none';
         groupKey.style.display = 'flex';
       } else {
         groupAlert.style.display = 'flex';
         groupKey.style.display = 'none';
+
+        if (cat === 'jj') {
+          if (labelMedia) labelMedia.innerText = 'URL Video Alert Jedag-Jedug (MP4 / WebM / GIF)';
+          if (groupJJ) groupJJ.style.display = 'flex';
+          if (rowJJFx) rowJJFx.style.display = 'flex';
+          document.getElementById('form-sfx').value = 'jj_beat';
+          document.getElementById('form-duration').value = '9';
+          if (!document.getElementById('form-name').value) {
+            document.getElementById('form-name').value = '🔥 Sultan Jedag-Jedug (20+ Koin)';
+            document.getElementById('form-action-title').value = '🔥 SULTAN ALERT: @{user}! 🔥';
+            document.getElementById('form-action-msg').value = 'Mengirim {count}x {gift} bernilai {coins} Koin! Mode Jedag-Jedug AKTIF!';
+            document.getElementById('form-media-url').value = 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4';
+            document.getElementById('form-gift-coins').value = '20';
+          }
+        } else {
+          if (labelMedia) labelMedia.innerText = 'URL Gambar / Video Alert (MP4 / WebM / GIF)';
+          if (groupJJ) groupJJ.style.display = 'none';
+          if (rowJJFx) rowJJFx.style.display = 'none';
+        }
       }
     }
 
     function onTriggerTypeChange() {
       const t = document.getElementById('form-trigger-type').value;
-      document.getElementById('group-trigger-gift').style.display = (t === 'gift') ? 'flex' : 'none';
+      document.getElementById('group-trigger-gift').style.display = (t === 'gift') ? 'grid' : 'none';
       document.getElementById('group-trigger-like').style.display = (t === 'like') ? 'flex' : 'none';
       document.getElementById('group-trigger-chat').style.display = (t === 'chat') ? 'flex' : 'none';
     }
@@ -1384,17 +1452,26 @@
       const triggerType = document.getElementById('form-trigger-type').value;
 
       const trigger = { type: triggerType };
-      if (triggerType === 'gift') trigger.giftName = document.getElementById('form-gift-name').value.trim() || 'Rose';
+      if (triggerType === 'gift') {
+        trigger.giftName = document.getElementById('form-gift-name').value.trim() || 'any';
+        trigger.minCoins = parseInt(document.getElementById('form-gift-coins').value, 10) || 1;
+      }
       if (triggerType === 'like') trigger.likeCount = parseInt(document.getElementById('form-like-count').value, 10) || 50;
       if (triggerType === 'chat') trigger.chatKeyword = document.getElementById('form-chat-keyword').value.trim() || '!jump';
+
+      const mediaUrl = document.getElementById('form-media-url').value.trim();
+      const hasJJFx = document.getElementById('form-jj-effects') ? document.getElementById('form-jj-effects').checked : true;
 
       const action = {
         type: category,
         title: document.getElementById('form-action-title').value.trim(),
         message: document.getElementById('form-action-msg').value.trim(),
-        media: document.getElementById('form-media-url').value.trim(),
+        media: mediaUrl,
+        videoUrl: mediaUrl,
         sfx: document.getElementById('form-sfx').value,
         duration: parseInt(document.getElementById('form-duration').value, 10) || 5,
+        flash: hasJJFx,
+        shake: hasJJFx,
         tts: document.getElementById('form-tts').checked,
         key: document.getElementById('form-keystroke-key').value
       };

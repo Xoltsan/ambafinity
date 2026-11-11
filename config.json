@@ -35,9 +35,9 @@
   "theme": "glass-blue",
   "autoPlay": true,
   "overlayConfig": {
-    "pos": "top-left",
-    "x": 24,
-    "y": 24,
+    "pos": "custom",
+    "x": 733,
+    "y": 131,
     "scale": 1,
     "locked": false
   }

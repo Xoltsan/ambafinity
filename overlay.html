@@ -646,6 +646,166 @@
       text-align: center;
       min-height: 24px;
     }
+
+    /* ============================================================
+       PUSAT INTERAKSI: JEDAG-JEDUG (JJ) VIDEO & BASS ALERT
+       ============================================================ */
+    .jj-flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0);
+      pointer-events: none;
+      z-index: 9995;
+      opacity: 0;
+      transition: opacity 0.05s ease;
+    }
+
+    .jj-flash-overlay.active {
+      opacity: 1;
+      animation: jjFlashStrobe 0.28s infinite alternate ease-in-out;
+    }
+
+    @keyframes jjFlashStrobe {
+      0% { background: rgba(56, 189, 248, 0.22); }
+      33% { background: rgba(244, 63, 94, 0.35); }
+      66% { background: rgba(250, 204, 21, 0.28); }
+      100% { background: rgba(168, 85, 247, 0.38); }
+    }
+
+    body.jj-bass-shake {
+      animation: jjScreenShake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite alternate;
+    }
+
+    @keyframes jjScreenShake {
+      0% { transform: scale(1) translate(0, 0); }
+      20% { transform: scale(1.025) translate(-7px, 5px) rotate(-0.8deg); }
+      40% { transform: scale(0.985) translate(6px, -4px) rotate(0.8deg); }
+      60% { transform: scale(1.03) translate(-5px, -3px) rotate(-0.5deg); }
+      80% { transform: scale(0.99) translate(4px, 4px) rotate(0.5deg); }
+      100% { transform: scale(1) translate(0, 0); }
+    }
+
+    .jj-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.65);
+      width: 480px;
+      max-width: 90vw;
+      background: rgba(11, 15, 25, 0.95);
+      border: 3px solid #f43f5e;
+      border-radius: 28px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 0 60px rgba(244, 63, 94, 0.7), 0 0 100px rgba(56, 189, 248, 0.5);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+    }
+
+    .jj-modal.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .jj-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(90deg, #f43f5e, #ec4899, #8b5cf6, #3b82f6);
+      background-size: 300% 300%;
+      padding: 6px 18px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 18px rgba(244, 63, 94, 0.6);
+      animation: jjBadgeGradient 2s ease infinite alternate;
+    }
+
+    @keyframes jjBadgeGradient {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .jj-video-container {
+      width: 100%;
+      height: 270px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #020617;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .jj-video-elem {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .jj-title {
+      font-size: 21px;
+      font-weight: 900;
+      color: #facc15;
+      text-align: center;
+      text-shadow: 0 2px 14px rgba(250, 204, 21, 0.7);
+      letter-spacing: -0.4px;
+      line-height: 1.25;
+    }
+
+    .jj-subtitle {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f1f5f9;
+      text-align: center;
+      opacity: 0.95;
+    }
+
+    .jj-eq-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 5px;
+      height: 26px;
+      width: 100%;
+    }
+
+    .jj-eq-bar {
+      width: 6px;
+      height: 8px;
+      background: linear-gradient(180deg, #f43f5e, #38bdf8);
+      border-radius: 4px;
+      animation: jjEqPulse 0.4s ease-in-out infinite alternate;
+    }
+
+    .jj-eq-bar:nth-child(2) { animation-delay: 0.08s; }
+    .jj-eq-bar:nth-child(3) { animation-delay: 0.16s; }
+    .jj-eq-bar:nth-child(4) { animation-delay: 0.24s; }
+    .jj-eq-bar:nth-child(5) { animation-delay: 0.12s; }
+    .jj-eq-bar:nth-child(6) { animation-delay: 0.20s; }
+    .jj-eq-bar:nth-child(7) { animation-delay: 0.04s; }
+    .jj-eq-bar:nth-child(8) { animation-delay: 0.28s; }
+
+    @keyframes jjEqPulse {
+      0% { height: 6px; }
+      100% { height: 26px; }
+    }
   </style>
 </head>
 <body class="theme-default">
@@ -760,6 +920,30 @@
       <canvas id="roulette-canvas" width="300" height="300"></canvas>
     </div>
     <div class="roulette-result" id="roulette-result">Memutar...</div>
+  </div>
+
+  <!-- ============================================================
+       5. PUSAT INTERAKSI: JEDAG-JEDUG (JJ) VIDEO & BASS ALERT
+       ============================================================ -->
+  <div id="jj-flash" class="jj-flash-overlay"></div>
+
+  <div id="jj-modal" class="jj-modal">
+    <div class="jj-badge">👑 SULTAN LIVE ALERT (20+ KOIN) 👑</div>
+    <div class="jj-video-container">
+      <video id="jj-video-elem" class="jj-video-elem" autoplay playsinline loop></video>
+    </div>
+    <div id="jj-title" class="jj-title">🔥 @Viewer Mengirim 20 Koin! 🔥</div>
+    <div id="jj-subtitle" class="jj-subtitle">⚡ MODE JEDAG-JEDUG MENYALA ABANGKU! ⚡</div>
+    <div class="jj-eq-bars">
+      <div class="jj-eq-bar"></div>
+      <div class="jj-eq-bar"></div>
+      <div class="jj-eq-bar"></div>
+      <div class="jj-eq-bar"></div>
+      <div class="jj-eq-bar"></div>
+      <div class="jj-eq-bar"></div>
+      <div class="jj-eq-bar"></div>
+      <div class="jj-eq-bar"></div>
+    </div>
   </div>
 
   <!-- Audio Notice Banner (Muncul jika browser memerlukan klik untuk mengizinkan suara) -->
@@ -1233,6 +1417,129 @@
       } catch(e) {}
     }
 
+    function playJedagJedugBeat(durationSec = 8) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const bpm = 132;
+        const beatSec = 60 / bpm;
+        const totalBeats = Math.floor(durationSec / beatSec);
+
+        for (let b = 0; b < totalBeats; b++) {
+          const t = ctx.currentTime + (b * beatSec);
+
+          // Sub-bass 808 kick punch (drops 160Hz -> 42Hz)
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(160, t);
+          osc.frequency.exponentialRampToValueAtTime(42, t + 0.18);
+
+          gain.gain.setValueAtTime(0.75, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+
+          osc.start(t);
+          osc.stop(t + 0.32);
+
+          // Hi-hat tick on off-beat
+          const hatT = t + (beatSec / 2);
+          const bufferSize = ctx.sampleRate * 0.05;
+          const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+          const whiteNoise = ctx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          const hatFilter = ctx.createBiquadFilter();
+          hatFilter.type = 'highpass';
+          hatFilter.frequency.value = 7500;
+          const hatGain = ctx.createGain();
+          hatGain.gain.setValueAtTime(0.25, hatT);
+          hatGain.gain.exponentialRampToValueAtTime(0.001, hatT + 0.04);
+          whiteNoise.connect(hatFilter);
+          hatFilter.connect(hatGain);
+          hatGain.connect(ctx.destination);
+          whiteNoise.start(hatT);
+          whiteNoise.stop(hatT + 0.04);
+        }
+      } catch (e) {
+        console.error('[JJ Audio Synthesizer Error]', e);
+      }
+    }
+
+    function runJJVideoAlert(alert, callback) {
+      const modal = document.getElementById('jj-modal');
+      const flash = document.getElementById('jj-flash');
+      const video = document.getElementById('jj-video-elem');
+      const title = document.getElementById('jj-title');
+      const subtitle = document.getElementById('jj-subtitle');
+
+      title.innerHTML = alert.title || `🔥 @${alert.user} Mengirim 20 Koin! 🔥`;
+      subtitle.innerHTML = alert.message || `⚡ MODE JEDAG-JEDUG MENYALA ABANGKU! ⚡`;
+
+      const videoSrc = alert.videoUrl || alert.media || 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4';
+      video.src = videoSrc;
+      video.currentTime = 0;
+      video.volume = 1.0;
+      video.muted = false;
+
+      // Turunkan volume musik Limusic agar beat JJ terdengar dominan (Audio Ducking)
+      if (ytPlayer && isPlayerReady) {
+        try { ytPlayer.setVolume(12); } catch(e) {}
+      }
+
+      // Mainkan video & synthesizer SFX
+      try {
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Jika browser memblokir unmuted autoplay, unmute saat fallback
+            video.muted = true;
+            video.play();
+          });
+        }
+      } catch (e) {}
+
+      const durationSec = alert.duration || 9;
+      playJedagJedugBeat(durationSec);
+
+      if (alert.flash !== false) {
+        flash.classList.add('active');
+      }
+      if (alert.shake !== false) {
+        document.body.classList.add('jj-bass-shake');
+      }
+
+      modal.classList.add('show');
+
+      if (alert.tts && alert.ttsText) {
+        setTimeout(() => speakTTS(alert.ttsText), 350);
+      }
+
+      setTimeout(() => {
+        modal.classList.remove('show');
+        flash.classList.remove('active');
+        document.body.classList.remove('jj-bass-shake');
+        try {
+          video.pause();
+          video.removeAttribute('src');
+          video.load();
+        } catch(e) {}
+
+        // Kembalikan volume Limusic ke 100%
+        if (ytPlayer && isPlayerReady) {
+          try { ytPlayer.setVolume(100); } catch(e) {}
+        }
+
+        if (callback) callback();
+      }, durationSec * 1000);
+    }
+
     function speakTTS(text) {
       if (!window.speechSynthesis || !text) return;
       try {
@@ -1267,6 +1574,13 @@
 
       if (alert.type === 'spin' || alert.category === 'spin') {
         runSpinRoulette(alert, () => {
+          setTimeout(processNextAlert, 600);
+        });
+        return;
+      }
+
+      if (alert.type === 'jj' || alert.category === 'jj' || alert.type === 'video') {
+        runJJVideoAlert(alert, () => {
           setTimeout(processNextAlert, 600);
         });
         return;
