@@ -477,16 +477,16 @@
       100% { transform: translateX(-50%) scale(1); }
     }
 
-    /* Audio Player YouTube Aktif (Dipertahankan di dalam viewport transparan agar tidak di-throttle Chromium) */
+    /* Audio Player YouTube Aktif (Dipertahankan di dalam viewport aktif tanpa origin lock) */
     #player-container {
       position: fixed;
-      bottom: 0;
-      right: 0;
+      top: -300px;
+      left: -300px;
       width: 240px;
-      height: 140px;
-      opacity: 0.001;
+      height: 240px;
+      opacity: 1;
       pointer-events: none;
-      z-index: -999;
+      z-index: -9999;
     }
 
     /* ============================================================
@@ -1099,12 +1099,14 @@
     let pendingTrackId = null;
     let currentPlayingVideoId = null;
     let isAudioUnlocked = false;
+    let currentCandidates = [];
+    let currentCandidateIndex = 0;
 
     // Inisialisasi YouTube Player
     window.onYouTubeIframeAPIReady = function() {
       console.log('[Overlay] YouTube IFrame API Ready, menginisialisasi player...');
       ytPlayer = new YT.Player('yt-player', {
-        height: '140',
+        height: '240',
         width: '240',
         playerVars: {
           autoplay: 1,
@@ -1112,7 +1114,9 @@
           disablekb: 1,
           enablejsapi: 1,
           playsinline: 1,
-          origin: window.location.origin
+          iv_load_policy: 3,
+          modestbranding: 1,
+          rel: 0
         },
         events: {
           onReady: onPlayerReady,
@@ -1136,8 +1140,17 @@
       }
     }
 
-    function playTrack(videoId) {
+    function playTrack(trackData) {
+      if (!trackData) return;
+      const videoId = typeof trackData === 'object' ? trackData.id : trackData;
       if (!videoId) return;
+
+      if (typeof trackData === 'object' && Array.isArray(trackData.candidates) && trackData.candidates.length > 0) {
+        currentCandidates = trackData.candidates;
+        const foundIdx = currentCandidates.findIndex(c => c.id === videoId);
+        currentCandidateIndex = foundIdx >= 0 ? foundIdx : 0;
+      }
+
       pendingTrackId = videoId;
 
       if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoById !== 'function') {
@@ -1191,6 +1204,7 @@
         console.log('[Overlay] Lagu selesai, melangkah ke lagu berikutnya...');
         currentPlayingVideoId = null;
         pendingTrackId = null;
+        currentCandidates = [];
         fetch('/api/skip', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1200,9 +1214,30 @@
     }
 
     function onPlayerError(event) {
-      console.warn('[Overlay] ⚠️ Player error code:', event.data, '-> otomatis melewati lagu...');
+      console.warn('[Overlay] ⚠️ Player error code:', event.data, 'pada video ID:', currentPlayingVideoId);
+      
+      // Jika video ini terkena pembatasan embed (error 150/101) atau error lain, otomatis coba kandidat berikutnya!
+      if (currentCandidates && currentCandidates.length > 0 && currentCandidateIndex < currentCandidates.length - 1) {
+        currentCandidateIndex++;
+        const next = currentCandidates[currentCandidateIndex];
+        console.log(`[Overlay] 🔄 Mencoba video kandidat alternatif #${currentCandidateIndex + 1} (${next.id}): "${next.title}"`);
+        currentPlayingVideoId = next.id;
+        try {
+          ytPlayer.loadVideoById({
+            videoId: next.id,
+            startSeconds: 0
+          });
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+          ytPlayer.playVideo();
+          return;
+        } catch (e) {}
+      }
+
+      console.warn('[Overlay] Semua kandidat gagal diputar, otomatis melewati lagu...');
       currentPlayingVideoId = null;
       pendingTrackId = null;
+      currentCandidates = [];
       fetch('/api/skip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1288,7 +1323,7 @@
           }
 
           // Trigger pemutaran audio
-          playTrack(track.id);
+          playTrack(track);
 
         } else {
           npTitle.innerText = 'Antrean Selesai';

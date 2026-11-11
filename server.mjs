@@ -285,6 +285,9 @@ async function searchYouTube(query) {
     const data = JSON.parse(match[1]);
     const contents = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
     
+    const candidates = [];
+    let primarySong = null;
+
     for (const c of contents) {
       if (c.videoRenderer) {
         const vr = c.videoRenderer;
@@ -295,14 +298,23 @@ async function searchYouTube(query) {
         const thumbnails = vr.thumbnail?.thumbnails || [];
         const thumbnail = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : '';
 
-        return {
+        const item = {
           id: videoId,
           title,
           artist,
           duration,
           thumbnail
         };
+
+        candidates.push(item);
+        if (!primarySong) primarySong = { ...item };
+        if (candidates.length >= 6) break;
       }
+    }
+
+    if (primarySong) {
+      primarySong.candidates = candidates;
+      return primarySong;
     }
   } catch (err) {
     console.error('[Search] Error mencari lagu:', err);
