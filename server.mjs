@@ -776,6 +776,82 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // 2c. Ambil Daftar File Asset (Video / Audio Lokal di Folder /assets) (/api/assets/list)
+  if (pathname === '/api/assets/list' && req.method === 'GET') {
+    const assetsDir = path.join(__dirname, 'assets');
+    if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
+    try {
+      const files = fs.readdirSync(assetsDir).filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.mp4', '.webm', '.mp3', '.wav', '.ogg', '.gif', '.png', '.jpg', '.jpeg'].includes(ext);
+      }).map(f => {
+        const stats = fs.statSync(path.join(assetsDir, f));
+        return {
+          name: f,
+          url: `/assets/${f}`,
+          size: (stats.size / (1024 * 1024)).toFixed(2) + ' MB',
+          ext: path.extname(f).toLowerCase()
+        };
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, files }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 2d. Upload File Video / Audio Kustom dari Komputer Streamer (/api/upload/video)
+  if (pathname === '/api/upload/video' && req.method === 'POST') {
+    const assetsDir = path.join(__dirname, 'assets');
+    if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
+
+    let rawFilename = parsedUrl.searchParams.get('filename') || ('video_' + Date.now() + '.mp4');
+    let ext = path.extname(rawFilename) || '.mp4';
+    let base = path.basename(rawFilename, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    let cleanName = `${base}${ext}`;
+    let targetPath = path.join(assetsDir, cleanName);
+
+    const contentType = req.headers['content-type'] || '';
+    if (contentType.includes('application/json')) {
+      try {
+        const data = await readJsonBody();
+        if (!data.base64) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Data base64 diperlukan' }));
+          return;
+        }
+        let targetFilename = data.filename || rawFilename;
+        let fileExt = path.extname(targetFilename) || '.mp4';
+        let baseName = path.basename(targetFilename, fileExt).replace(/[^a-zA-Z0-9_-]/g, '_');
+        let finalCleanName = `${baseName}${fileExt}`;
+        let actualTargetPath = path.join(assetsDir, finalCleanName);
+
+        const cleanBase64 = data.base64.replace(/^data:[^;]+;base64,/, '');
+        fs.writeFileSync(actualTargetPath, Buffer.from(cleanBase64, 'base64'));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, url: `/assets/${finalCleanName}`, filename: finalCleanName }));
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: e.message }));
+      }
+      return;
+    } else {
+      const fileStream = fs.createWriteStream(targetPath);
+      req.pipe(fileStream);
+      fileStream.on('finish', () => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, url: `/assets/${cleanName}`, filename: cleanName }));
+      });
+      fileStream.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      });
+      return;
+    }
+  }
+
   async function readJsonBody() {
     return new Promise((resolve, reject) => {
       let body = '';

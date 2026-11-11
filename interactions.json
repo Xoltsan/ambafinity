@@ -20,7 +20,8 @@
       "shake": true,
       "tts": true,
       "ttsText": "Wah gila! Sultan {user} baru saja mengirim 20 koin! Jedag jedug menyala abangku!",
-      "duration": 9
+      "duration": 10,
+      "autoEnd": true
     }
   },
   {

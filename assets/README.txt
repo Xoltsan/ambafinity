@@ -12,3 +12,4 @@ Contoh cara penggunaan:
 4. Simpan, lalu test interaksi atau kirim gift di TikTok! Video akan otomatis diputar
    lengkap dengan efek jedag-jedug, flash strobe, dan audio langsung di overlay OBS!
 ================================================================
+

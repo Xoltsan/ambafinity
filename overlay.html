@@ -806,6 +806,37 @@
       0% { height: 6px; }
       100% { height: 26px; }
     }
+
+    .jj-timer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #38bdf8;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .jj-progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: -4px;
+    }
+
+    .jj-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #f43f5e, #8b5cf6, #38bdf8);
+      width: 100%;
+      transition: width linear;
+    }
   </style>
 </head>
 <body class="theme-default">
@@ -928,7 +959,10 @@
   <div id="jj-flash" class="jj-flash-overlay"></div>
 
   <div id="jj-modal" class="jj-modal">
-    <div class="jj-badge">👑 SULTAN LIVE ALERT (20+ KOIN) 👑</div>
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div class="jj-badge">👑 SULTAN LIVE ALERT (20+ KOIN) 👑</div>
+      <div class="jj-timer-pill" id="jj-timer-pill">⏱️ <span id="jj-time-left">10</span>s</div>
+    </div>
     <div class="jj-video-container">
       <video id="jj-video-elem" class="jj-video-elem" autoplay playsinline loop></video>
     </div>
@@ -943,6 +977,9 @@
       <div class="jj-eq-bar"></div>
       <div class="jj-eq-bar"></div>
       <div class="jj-eq-bar"></div>
+    </div>
+    <div class="jj-progress-bar-container">
+      <div id="jj-progress-bar" class="jj-progress-bar"></div>
     </div>
   </div>
 
@@ -1478,6 +1515,8 @@
       const video = document.getElementById('jj-video-elem');
       const title = document.getElementById('jj-title');
       const subtitle = document.getElementById('jj-subtitle');
+      const timerEl = document.getElementById('jj-time-left');
+      const progressBar = document.getElementById('jj-progress-bar');
 
       title.innerHTML = alert.title || `🔥 @${alert.user} Mengirim 20 Koin! 🔥`;
       subtitle.innerHTML = alert.message || `⚡ MODE JEDAG-JEDUG MENYALA ABANGKU! ⚡`;
@@ -1505,7 +1544,19 @@
         }
       } catch (e) {}
 
-      const durationSec = alert.duration || 9;
+      const durationSec = Math.max(1, parseInt(alert.duration, 10) || 10);
+      let remainingSec = durationSec;
+      if (timerEl) timerEl.innerText = remainingSec;
+
+      if (progressBar) {
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '100%';
+        setTimeout(() => {
+          progressBar.style.transition = `width ${durationSec}s linear`;
+          progressBar.style.width = '0%';
+        }, 50);
+      }
+
       playJedagJedugBeat(durationSec);
 
       if (alert.flash !== false) {
@@ -1521,7 +1572,16 @@
         setTimeout(() => speakTTS(alert.ttsText), 350);
       }
 
-      setTimeout(() => {
+      let isFinished = false;
+      let timerInterval = null;
+      let mainTimeout = null;
+
+      function finishAlert() {
+        if (isFinished) return;
+        isFinished = true;
+        if (timerInterval) clearInterval(timerInterval);
+        if (mainTimeout) clearTimeout(mainTimeout);
+
         modal.classList.remove('show');
         flash.classList.remove('active');
         document.body.classList.remove('jj-bass-shake');
@@ -1537,7 +1597,23 @@
         }
 
         if (callback) callback();
-      }, durationSec * 1000);
+      }
+
+      timerInterval = setInterval(() => {
+        remainingSec--;
+        if (timerEl && remainingSec >= 0) timerEl.innerText = remainingSec;
+        if (remainingSec <= 0) {
+          finishAlert();
+        }
+      }, 1000);
+
+      video.onended = () => {
+        if (alert.autoEnd !== false) {
+          finishAlert();
+        }
+      };
+
+      mainTimeout = setTimeout(finishAlert, durationSec * 1000);
     }
 
     function speakTTS(text) {

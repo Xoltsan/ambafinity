@@ -999,21 +999,96 @@
         <input type="text" id="form-action-msg" class="input-field" value="Terima kasih banyak atas dukungannya!">
       </div>
 
-      <div id="group-action-alert" style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="form-group">
-          <label id="label-media-url">URL Gambar / Video Alert (MP4 / WebM / GIF)</label>
-          <input type="text" id="form-media-url" class="input-field" value="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif">
-          <div id="group-jj-presets" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
-            <span style="font-size: 11px; color: #94a3b8; width: 100%;">Pilihan Cepat Video Jedag-Jedug:</span>
+      <div id="group-action-alert" style="display: flex; flex-direction: column; gap: 14px;">
+        
+        <!-- Box 1: Sumber Video / Media Kustom (Upload dari PC / Pilih File) -->
+        <div style="background: var(--card-inner); padding: 14px; border-radius: 14px; border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label id="label-media-url" style="font-weight: 800; color: #f8fafc; font-size: 13.5px; margin-bottom: 0;">🎬 Video Alert / Jedag-Jedug dari Kita</label>
+            <span id="upload-status" style="font-size: 11.5px; font-weight: 700; color: #38bdf8;"></span>
+          </div>
+
+          <!-- Tombol Aksi Upload File Video Langsung dari Komputer -->
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="file" id="form-video-file-input" accept="video/mp4,video/webm,video/*,image/gif" style="display: none;" onchange="uploadVideoFromComputer(this)">
+            <button type="button" class="btn btn-primary" style="font-size: 12px; padding: 7px 14px; background: linear-gradient(90deg, #38bdf8, #818cf8); color: #020617; font-weight: 800;" onclick="document.getElementById('form-video-file-input').click()">
+              📤 Upload Video Sendiri (.mp4 / .webm)
+            </button>
+            <button type="button" class="btn btn-outline" style="font-size: 11.5px; padding: 7px 12px;" onclick="loadAssetsList(true)">
+              🔄 Segarkan File Tersimpan
+            </button>
+          </div>
+
+          <!-- Dropdown Pilihan File yang Ada di Folder /assets -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 11.5px; color: #94a3b8; font-weight: 600;">Atau pilih dari koleksi video di komputer yang sudah pernah diupload:</span>
+            <select id="form-asset-select" class="input-field" style="font-size: 12px; padding: 6px 10px;" onchange="onSelectAssetFile(this.value)">
+              <option value="">-- Pilih file video di server --</option>
+            </select>
+          </div>
+
+          <!-- Input URL / File Path Manual -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 11px; color: #94a3b8;">URL / Path File Video yang Aktif:</span>
+            <input type="text" id="form-media-url" class="input-field" value="https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4" oninput="updateVideoPreview(this.value)">
+          </div>
+
+          <!-- Pratinjau Video Player Langsung di Modal -->
+          <div id="video-preview-container" style="display: flex; flex-direction: column; gap: 4px; background: #000; padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8;">
+              <span style="font-weight: 700;">📺 Pratinjau Video (Bisa Ditonton Langsung):</span>
+              <span id="preview-video-duration" style="color: #38bdf8; font-weight: 800;"></span>
+            </div>
+            <video id="form-video-preview" controls playsinline style="max-height: 150px; width: 100%; border-radius: 6px; background: #020617; object-fit: contain;"></video>
+          </div>
+
+          <!-- Pilihan Cepat Preset -->
+          <div id="group-jj-presets" style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <span style="font-size: 11px; color: #94a3b8; width: 100%;">Pilihan Cepat Contoh:</span>
             <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4')">⚡ JJ Bass Hype (Default)</button>
             <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif')">🌹 Mawar Pop</button>
-            <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 3px 8px;" onclick="setJJVideoPreset('/assets/jj_sultan.mp4')">📁 File Lokal (/assets/jj_sultan.mp4)</button>
           </div>
         </div>
 
+        <!-- Box 2: Pengaturan Durasi Video Diputar (Berapa Detik) -->
+        <div style="background: var(--card-inner); padding: 14px; border-radius: 14px; border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-weight: 800; color: #facc15; font-size: 13.5px; margin-bottom: 0;">⏱️ Atur Berapa Detik Video Ditampilkan di Stream</label>
+            <span id="label-duration-display" style="font-weight: 900; font-size: 14px; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 12px; border-radius: 99px; border: 1px solid rgba(56, 189, 248, 0.4);">10 Detik</span>
+          </div>
+
+          <!-- Slider Durasi (1 s/d 60 detik) -->
+          <input type="range" id="form-duration-slider" min="1" max="60" value="10" step="1" style="accent-color: #38bdf8; cursor: pointer; height: 6px;" oninput="onDurationSliderChange(this.value)">
+
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;">
+            <!-- Tombol Preset Detik Cepat -->
+            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+              <span style="font-size: 11px; color: #64748b; align-self: center;">Pilihan Cepat:</span>
+              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(5)">5 Detik</button>
+              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(8)">8 Detik</button>
+              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(10)">10 Detik</button>
+              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(15)">15 Detik</button>
+              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(20)">20 Detik</button>
+              <button type="button" class="btn btn-outline" style="font-size: 11px; padding: 2px 8px;" onclick="setDurationSeconds(30)">30 Detik</button>
+            </div>
+
+            <!-- Input Angka Manual -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input type="number" id="form-duration" class="input-field" value="10" min="1" max="180" style="width: 70px; padding: 4px 8px; font-weight: 800; text-align: center; color: #38bdf8;" oninput="onDurationInputChange(this.value)">
+              <span style="font-size: 12px; color: #cbd5e1; font-weight: 600;">detik</span>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+            <input type="checkbox" id="form-auto-end" checked style="width: 16px; height: 16px; accent-color: #38bdf8;">
+            <label for="form-auto-end" style="font-size: 11.5px; color: #94a3b8; cursor: pointer; margin-bottom: 0;">Selesai otomatis jika video asli habis sebelum durasi selesai</label>
+          </div>
+        </div>
+
+        <!-- Box 3: Efek Suara, TTS & Visual -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
-            <label>Efek Suara (SFX)</label>
+            <label>Efek Suara Tambahan (SFX)</label>
             <select id="form-sfx" class="input-field">
               <option value="jj_beat">⚡ Jedag-Jedug (DJ Bass Beat Drop)</option>
               <option value="bell">🔔 Bell / Chime</option>
@@ -1022,22 +1097,18 @@
               <option value="ting">✨ Ting Ting</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Durasi Tampil (Detik)</label>
-            <input type="number" id="form-duration" class="input-field" value="5" min="2" max="20">
+          <div class="form-group" style="display: flex; flex-direction: column; justify-content: center; gap: 6px;">
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+              <input type="checkbox" id="form-tts" checked style="width: 18px; height: 18px;">
+              <label for="form-tts" style="margin-bottom: 0; cursor: pointer;">Suara TTS (Bahasa Indonesia)</label>
+            </div>
+            <div id="row-jj-fx" class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+              <input type="checkbox" id="form-jj-effects" checked style="width: 18px; height: 18px;">
+              <label for="form-jj-effects" style="margin-bottom: 0; cursor: pointer;">Flash Strobe & Bass Shake Layar</label>
+            </div>
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
-          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-            <input type="checkbox" id="form-tts" checked style="width: 18px; height: 18px;">
-            <label for="form-tts" style="margin-bottom: 0; cursor: pointer;">Bacakan Suara TTS Otomatis (Bahasa Indonesia)</label>
-          </div>
-          <div id="row-jj-fx" class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-            <input type="checkbox" id="form-jj-effects" checked style="width: 18px; height: 18px;">
-            <label for="form-jj-effects" style="margin-bottom: 0; cursor: pointer;">Aktifkan Efek Flash Strobe & Screen Bass Shake</label>
-          </div>
-        </div>
       </div>
 
       <div id="group-action-keystroke" class="form-group" style="display: none;">
@@ -1337,8 +1408,108 @@
       } catch(e) {}
     }
 
+    // ============================================================
+    // FITUR ASSET & VIDEO CUSTOM (UPLOAD DARI PC & DURASI DETIK)
+    // ============================================================
+    async function loadAssetsList(alertSuccess = false) {
+      try {
+        const res = await fetch('/api/assets/list');
+        if (!res.ok) return;
+        const data = await res.json();
+        const select = document.getElementById('form-asset-select');
+        if (!select) return;
+        select.innerHTML = '<option value="">-- Pilih file video di server --</option>';
+        if (data.files && data.files.length > 0) {
+          data.files.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.url;
+            opt.innerText = `${f.name} (${f.size})`;
+            select.appendChild(opt);
+          });
+        }
+        if (alertSuccess) {
+          alert('Daftar file asset diperbarui! Ditemukan ' + (data.files ? data.files.length : 0) + ' file.');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function onSelectAssetFile(url) {
+      if (!url) return;
+      document.getElementById('form-media-url').value = url;
+      updateVideoPreview(url);
+    }
+
     function setJJVideoPreset(url) {
       document.getElementById('form-media-url').value = url;
+      updateVideoPreview(url);
+    }
+
+    function updateVideoPreview(url) {
+      const preview = document.getElementById('form-video-preview');
+      const badge = document.getElementById('preview-video-duration');
+      if (!url) {
+        if (preview) preview.removeAttribute('src');
+        if (badge) badge.innerText = '';
+        return;
+      }
+      if (preview) {
+        preview.src = url;
+        preview.onloadedmetadata = () => {
+          if (badge && preview.duration && !isNaN(preview.duration)) {
+            const dur = Math.round(preview.duration);
+            badge.innerText = `Durasi Asli: ${dur}s`;
+            // Sarankan durasi jika masih default
+            const currentDur = parseInt(document.getElementById('form-duration').value, 10);
+            if (dur > 0 && dur <= 60 && (!currentDur || currentDur === 10 || currentDur === 5)) {
+              setDurationSeconds(dur);
+            }
+          }
+        };
+      }
+    }
+
+    async function uploadVideoFromComputer(input) {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      const status = document.getElementById('upload-status');
+      if (status) status.innerText = `⏳ Mengupload ${file.name}...`;
+
+      try {
+        const res = await fetch('/api/upload/video?filename=' + encodeURIComponent(file.name), {
+          method: 'POST',
+          body: file
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+          if (status) status.innerText = `✅ Berhasil diupload: ${data.filename}!`;
+          document.getElementById('form-media-url').value = data.url;
+          updateVideoPreview(data.url);
+          loadAssetsList();
+        } else {
+          if (status) status.innerText = `❌ Gagal: ${data.error || 'Upload gagal'}`;
+        }
+      } catch (e) {
+        if (status) status.innerText = `❌ Error: ${e.message}`;
+      }
+    }
+
+    function setDurationSeconds(sec) {
+      const val = Math.max(1, parseInt(sec, 10) || 10);
+      document.getElementById('form-duration').value = val;
+      document.getElementById('form-duration-slider').value = Math.min(val, 60);
+      document.getElementById('label-duration-display').innerText = `${val} Detik`;
+    }
+
+    function onDurationSliderChange(val) {
+      setDurationSeconds(val);
+    }
+
+    function onDurationInputChange(val) {
+      const num = parseInt(val, 10) || 1;
+      document.getElementById('form-duration-slider').value = Math.min(num, 60);
+      document.getElementById('label-duration-display').innerText = `${num} Detik`;
     }
 
     async function simCustomCoins() {
@@ -1351,21 +1522,24 @@
       document.getElementById('modal-title').innerText = 'Tambah Interaksi Baru';
       document.getElementById('modal-inter-id').value = '';
       document.getElementById('form-name').value = '';
-      document.getElementById('form-category').value = 'alert';
+      document.getElementById('form-category').value = 'jj';
       document.getElementById('form-trigger-type').value = 'gift';
       document.getElementById('form-gift-name').value = 'any';
-      document.getElementById('form-gift-coins').value = '1';
+      document.getElementById('form-gift-coins').value = '20';
       document.getElementById('form-like-count').value = '50';
       document.getElementById('form-chat-keyword').value = '';
-      document.getElementById('form-action-title').value = '{user} Mengirim {gift}! 🌹';
-      document.getElementById('form-action-msg').value = 'Terima kasih banyak atas dukungannya!';
-      document.getElementById('form-media-url').value = 'https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif';
-      document.getElementById('form-sfx').value = 'bell';
-      document.getElementById('form-duration').value = '5';
+      document.getElementById('form-action-title').value = '🔥 SULTAN ALERT: @{user}! 🔥';
+      document.getElementById('form-action-msg').value = 'Mengirim {count}x {gift} bernilai {coins} Koin! Mode Jedag-Jedug AKTIF!';
+      document.getElementById('form-media-url').value = 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4';
+      document.getElementById('form-sfx').value = 'jj_beat';
+      setDurationSeconds(10);
       document.getElementById('form-tts').checked = true;
       if (document.getElementById('form-jj-effects')) document.getElementById('form-jj-effects').checked = true;
+      if (document.getElementById('form-auto-end')) document.getElementById('form-auto-end').checked = true;
       onCategoryChange();
       onTriggerTypeChange();
+      loadAssetsList();
+      updateVideoPreview('https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4');
       document.getElementById('interaction-modal').classList.add('show');
     }
 
@@ -1383,16 +1557,22 @@
       document.getElementById('form-chat-keyword').value = item.trigger?.chatKeyword || '';
       document.getElementById('form-action-title').value = item.action?.title || '';
       document.getElementById('form-action-msg').value = item.action?.message || '';
-      document.getElementById('form-media-url').value = item.action?.media || item.action?.videoUrl || '';
+      const mediaVal = item.action?.media || item.action?.videoUrl || '';
+      document.getElementById('form-media-url').value = mediaVal;
       document.getElementById('form-sfx').value = item.action?.sfx || 'bell';
-      document.getElementById('form-duration').value = item.action?.duration || 5;
+      setDurationSeconds(item.action?.duration || 10);
       document.getElementById('form-tts').checked = !!item.action?.tts;
       if (document.getElementById('form-jj-effects')) {
         document.getElementById('form-jj-effects').checked = item.action?.flash !== false;
       }
+      if (document.getElementById('form-auto-end')) {
+        document.getElementById('form-auto-end').checked = item.action?.autoEnd !== false;
+      }
       if (item.action?.key) document.getElementById('form-keystroke-key').value = item.action.key;
       onCategoryChange();
       onTriggerTypeChange();
+      loadAssetsList();
+      updateVideoPreview(mediaVal);
       document.getElementById('interaction-modal').classList.add('show');
     }
 
@@ -1416,20 +1596,12 @@
         groupKey.style.display = 'none';
 
         if (cat === 'jj') {
-          if (labelMedia) labelMedia.innerText = 'URL Video Alert Jedag-Jedug (MP4 / WebM / GIF)';
+          if (labelMedia) labelMedia.innerText = '🎬 Video Alert / Jedag-Jedug dari Kita';
           if (groupJJ) groupJJ.style.display = 'flex';
           if (rowJJFx) rowJJFx.style.display = 'flex';
           document.getElementById('form-sfx').value = 'jj_beat';
-          document.getElementById('form-duration').value = '9';
-          if (!document.getElementById('form-name').value) {
-            document.getElementById('form-name').value = '🔥 Sultan Jedag-Jedug (20+ Koin)';
-            document.getElementById('form-action-title').value = '🔥 SULTAN ALERT: @{user}! 🔥';
-            document.getElementById('form-action-msg').value = 'Mengirim {count}x {gift} bernilai {coins} Koin! Mode Jedag-Jedug AKTIF!';
-            document.getElementById('form-media-url').value = 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4';
-            document.getElementById('form-gift-coins').value = '20';
-          }
         } else {
-          if (labelMedia) labelMedia.innerText = 'URL Gambar / Video Alert (MP4 / WebM / GIF)';
+          if (labelMedia) labelMedia.innerText = 'URL Gambar / Video Alert';
           if (groupJJ) groupJJ.style.display = 'none';
           if (rowJJFx) rowJJFx.style.display = 'none';
         }
@@ -1461,6 +1633,8 @@
 
       const mediaUrl = document.getElementById('form-media-url').value.trim();
       const hasJJFx = document.getElementById('form-jj-effects') ? document.getElementById('form-jj-effects').checked : true;
+      const durationVal = parseInt(document.getElementById('form-duration').value, 10) || 10;
+      const autoEndVal = document.getElementById('form-auto-end') ? document.getElementById('form-auto-end').checked : true;
 
       const action = {
         type: category,
@@ -1469,7 +1643,8 @@
         media: mediaUrl,
         videoUrl: mediaUrl,
         sfx: document.getElementById('form-sfx').value,
-        duration: parseInt(document.getElementById('form-duration').value, 10) || 5,
+        duration: durationVal,
+        autoEnd: autoEndVal,
         flash: hasJJFx,
         shake: hasJJFx,
         tts: document.getElementById('form-tts').checked,
