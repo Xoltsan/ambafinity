@@ -477,16 +477,16 @@
       100% { transform: translateX(-50%) scale(1); }
     }
 
-    /* Audio Player YouTube Aktif (Dipertahankan di dalam viewport aktif tanpa origin lock) */
+    /* Audio Player YouTube Aktif (Dipertahankan di dalam viewport agar tidak dimute oleh Chromium) */
     #player-container {
       position: fixed;
-      top: -300px;
-      left: -300px;
-      width: 240px;
-      height: 240px;
-      opacity: 1;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 120px;
+      opacity: 0.01;
       pointer-events: none;
-      z-index: -9999;
+      z-index: -1;
     }
 
     /* ============================================================
@@ -1191,12 +1191,20 @@
         setPlayingVisuals(true);
         // Otomatis coba unmute saat lagu mulai bermain
         try {
-          if (ytPlayer.isMuted()) {
-            ytPlayer.unMute();
-          }
+          ytPlayer.unMute();
           ytPlayer.setVolume(100);
         } catch (e) {}
-        hideAudioNotice();
+
+        // Periksa apakah audio browser masih dibisukan karena autoplay policy
+        setTimeout(() => {
+          try {
+            if (ytPlayer && typeof ytPlayer.isMuted === 'function' && ytPlayer.isMuted() && !isAudioUnlocked) {
+              showAudioNotice();
+            } else if (isAudioUnlocked) {
+              hideAudioNotice();
+            }
+          } catch (e) {}
+        }, 600);
       } else if (event.data === YT.PlayerState.PAUSED) {
         // Jika ter-pause karena browser autoplay policy
         console.log('[Overlay] Player state: PAUSED');
@@ -1253,6 +1261,22 @@
       }
     }
 
+    function showAudioNotice() {
+      if (audioNotice && !isAudioUnlocked) {
+        audioNotice.style.display = 'flex';
+        audioNotice.style.opacity = '1';
+        audioNotice.style.pointerEvents = 'auto';
+      }
+    }
+
+    function hideAudioNotice() {
+      if (audioNotice) {
+        audioNotice.style.opacity = '0';
+        audioNotice.style.pointerEvents = 'none';
+        setTimeout(() => { audioNotice.style.display = 'none'; }, 300);
+      }
+    }
+
     function unlockAudio(e) {
       if (e && e.stopPropagation) e.stopPropagation();
       isAudioUnlocked = true;
@@ -1264,14 +1288,13 @@
           ytPlayer.playVideo();
         } catch (e) {}
       }
-    }
-
-    function hideAudioNotice() {
-      if (audioNotice) {
-        audioNotice.style.opacity = '0';
-        audioNotice.style.pointerEvents = 'none';
-        setTimeout(() => { audioNotice.style.display = 'none'; }, 300);
-      }
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          ctx.resume();
+        }
+      } catch (e) {}
     }
 
     // Klik di mana saja pada layar browser akan membuka izin suara otomatis
