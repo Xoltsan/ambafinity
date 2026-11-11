@@ -1,0 +1,13 @@
+{
+  "name": "limusic-tiktok-live-stream",
+  "version": "1.0.0",
+  "description": "TikTok Live Song Request Bot & OBS Vinyl Music Overlay for Limusic",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0"
+  }
+}

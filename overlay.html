@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limusic TikTok Live Music Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --card-bg: rgba(255, 255, 255, 0.72);
+      --card-border: rgba(255, 255, 255, 0.85);
+      --card-shadow: 0 16px 36px -8px rgba(15, 35, 65, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+      --text-title: #0f172a;
+      --text-artist: #475569;
+      --text-badge: #2563eb;
+      --badge-bg: rgba(37, 99, 235, 0.12);
+      --wave-color: #334155;
+      --vinyl-groove: #18181b;
+      --vinyl-sheen: rgba(255, 255, 255, 0.15);
+      --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Dark theme support */
+    body.theme-dark {
+      --card-bg: rgba(20, 26, 40, 0.75);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --card-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      --text-title: #f8fafc;
+      --text-artist: #94a3b8;
+      --text-badge: #60a5fa;
+      --badge-bg: rgba(96, 165, 250, 0.16);
+      --wave-color: #94a3b8;
+    }
+
+    /* TikTok theme support */
+    body.theme-tiktok {
+      --card-bg: rgba(18, 18, 24, 0.82);
+      --card-border: rgba(37, 244, 238, 0.35);
+      --card-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(37, 244, 238, 0.12);
+      --text-title: #ffffff;
+      --text-artist: #e2e8f0;
+      --text-badge: #25f4ee;
+      --badge-bg: rgba(37, 244, 238, 0.18);
+      --wave-color: #fe2c55;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: transparent;
+      font-family: var(--font-family);
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .overlay-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 440px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ============================================================
+       TOP CARD: NOW PLAYING WITH SPINNING VINYL RECORD
+       ============================================================ */
+    .now-playing-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 140px;
+    }
+
+    /* Piringan Hitam (Vinyl Record) */
+    .vinyl-record {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 144px;
+      height: 144px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        #09090b 0%,
+        #18181b 28%,
+        #09090b 32%,
+        #27272a 44%,
+        #09090b 48%,
+        #27272a 62%,
+        #09090b 66%,
+        #18181b 88%,
+        #09090b 100%
+      );
+      box-shadow: 
+        0 10px 28px rgba(0, 0, 0, 0.45),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Efek alur specular sheen mengilap pada vinyl */
+    .vinyl-record::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 45deg,
+        rgba(255, 255, 255, 0.12) 0deg,
+        transparent 60deg,
+        rgba(255, 255, 255, 0.15) 120deg,
+        transparent 180deg,
+        rgba(255, 255, 255, 0.12) 240deg,
+        transparent 300deg,
+        rgba(255, 255, 255, 0.15) 360deg
+      );
+      pointer-events: none;
+    }
+
+    /* Animasi putaran vinyl 360 derajat */
+    .vinyl-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spinVinyl 5s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .playing .vinyl-inner {
+      animation-play-state: running;
+    }
+
+    @keyframes spinVinyl {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Label tengah piringan hitam (Center Album Cover) */
+    .vinyl-art {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    /* Titik putih poros tengah vinyl */
+    .vinyl-spindle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 30%, #cbd5e1 70%, #475569 100%);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      z-index: 5;
+    }
+
+    /* Kartu Kaca / Glassmorphic Card (Right Side) */
+    .now-playing-card {
+      position: absolute;
+      left: 64px;
+      right: 0;
+      height: 122px;
+      background: var(--card-bg);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      box-shadow: var(--card-shadow);
+      padding: 16px 20px 16px 88px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+
+    /* Informasi Lagu */
+    .track-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .track-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-title);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.3px;
+      line-height: 1.25;
+    }
+
+    .track-artist {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-artist);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0.9;
+    }
+
+    /* Sound Wave / Audio Waveform Bars */
+    .waveform-bars {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 22px;
+      margin-top: 10px;
+    }
+
+    .wave-bar {
+      width: 3.5px;
+      background: var(--wave-color);
+      border-radius: 99px;
+      height: 4px;
+      opacity: 0.85;
+      transition: height 0.15s ease;
+    }
+
+    .playing .wave-bar {
+      animation: waveDance 1.2s ease-in-out infinite alternate;
+    }
+
+    .wave-bar:nth-child(1)  { height: 3px; animation-delay: 0.1s; }
+    .wave-bar:nth-child(2)  { height: 5px; animation-delay: 0.3s; }
+    .wave-bar:nth-child(3)  { height: 10px; animation-delay: 0.5s; }
+    .wave-bar:nth-child(4)  { height: 16px; animation-delay: 0.2s; }
+    .wave-bar:nth-child(5)  { height: 12px; animation-delay: 0.6s; }
+    .wave-bar:nth-child(6)  { height: 19px; animation-delay: 0.4s; }
+    .wave-bar:nth-child(7)  { height: 14px; animation-delay: 0.15s; }
+    .wave-bar:nth-child(8)  { height: 21px; animation-delay: 0.55s; }
+    .wave-bar:nth-child(9)  { height: 16px; animation-delay: 0.25s; }
+    .wave-bar:nth-child(10) { height: 18px; animation-delay: 0.45s; }
+    .wave-bar:nth-child(11) { height: 11px; animation-delay: 0.35s; }
+    .wave-bar:nth-child(12) { height: 17px; animation-delay: 0.65s; }
+    .wave-bar:nth-child(13) { height: 14px; animation-delay: 0.2s; }
+    .wave-bar:nth-child(14) { height: 8px; animation-delay: 0.5s; }
+    .wave-bar:nth-child(15) { height: 4px; animation-delay: 0.1s; }
+    .wave-bar:nth-child(16) { height: 3px; animation-delay: 0.3s; }
+
+    @keyframes waveDance {
+      0% { height: 3px; transform: scaleY(0.4); }
+      100% { height: 22px; transform: scaleY(1); }
+    }
+
+    /* Requester Badge */
+    .requester-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-badge);
+      background: var(--badge-bg);
+      padding: 3px 8px;
+      border-radius: 20px;
+      width: fit-content;
+      margin-top: 6px;
+      letter-spacing: 0.1px;
+    }
+
+    .requester-badge svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    /* ============================================================
+       BOTTOM CARD: UP NEXT / NEXT IN QUEUE (PERSIS REFERENSI KEDUA)
+       ============================================================ */
+    .up-next-card {
+      width: 320px;
+      height: 64px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: 20px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .up-next-card.hidden {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+      pointer-events: none;
+    }
+
+    /* Rounded square cover thumbnail pada kartu Up Next */
+    .up-next-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      flex-shrink: 0;
+    }
+
+    .up-next-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .up-next-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .up-next-label {
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-badge);
+    }
+
+    .up-next-user {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-artist);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .up-next-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-title);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.2px;
+    }
+
+    .up-next-artist {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-artist);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0.85;
+    }
+
+    /* Notifikasi Pop-up Saat Ada Request Baru Masuk */
+    .request-toast {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      transform: translateY(-50px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 99;
+    }
+
+    .request-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Banner Bantuan Audio Autoplay untuk Browser */
+    .audio-notice {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #38bdf8;
+      padding: 10px 20px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(14px);
+      z-index: 99999;
+      animation: pulseAudio 2.2s infinite ease-in-out;
+      transition: all 0.3s ease;
+    }
+
+    .audio-notice:hover {
+      background: rgba(56, 189, 248, 0.25);
+      color: #ffffff;
+      transform: translateX(-50%) scale(1.04);
+    }
+
+    @keyframes pulseAudio {
+      0% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.03); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+
+    /* Audio Player YouTube Aktif (Dipertahankan di dalam viewport transparan agar tidak di-throttle Chromium) */
+    #player-container {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 240px;
+      height: 140px;
+      opacity: 0.001;
+      pointer-events: none;
+      z-index: -999;
+    }
+  </style>
+</head>
+<body class="theme-default">
+
+  <!-- Pop-up Toast Saat Ada Request Baru -->
+  <div id="request-toast" class="request-toast">
+    <span style="font-size: 16px;">🎵</span>
+    <span id="toast-text">Request baru masuk!</span>
+  </div>
+
+  <div class="overlay-wrapper" id="overlay-wrapper">
+    
+    <!-- 1. KARTU UTAMA: NOW PLAYING DENGAN PIRINGAN HITAM BERPUTAR -->
+    <div class="now-playing-container playing" id="np-container">
+      
+      <!-- Piringan Hitam (Vinyl Record) -->
+      <div class="vinyl-record">
+        <div class="vinyl-inner" id="vinyl-inner">
+          <img 
+            id="np-cover" 
+            class="vinyl-art" 
+            src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&auto=format&fit=crop&q=80" 
+            alt="Album Cover"
+          >
+          <div class="vinyl-spindle"></div>
+        </div>
+      </div>
+
+      <!-- Kartu Glassmorphic Kanan -->
+      <div class="now-playing-card">
+        <div class="track-info">
+          <div class="track-title" id="np-title">Menunggu Lagu...</div>
+          <div class="track-artist" id="np-artist">Ketik !play [lagu] di chat</div>
+        </div>
+
+        <!-- Animated Sound Wave / Equalizer Bars -->
+        <div class="waveform-bars" id="waveform">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <!-- Badge Requester (Jika direquest oleh penonton) -->
+        <div class="requester-badge" id="np-badge" style="display: none;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          <span id="np-user">Requested by @viewer</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. KARTU KEDUA: UP NEXT / NEXT IN QUEUE -->
+    <div class="up-next-card" id="up-next-card">
+      <img 
+        id="next-cover" 
+        class="up-next-thumb" 
+        src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=80" 
+        alt="Next Cover"
+      >
+      <div class="up-next-info">
+        <div class="up-next-header">
+          <span class="up-next-label">UP NEXT</span>
+          <span class="up-next-user" id="next-user"></span>
+        </div>
+        <div class="up-next-title" id="next-title">Antrean Kosong</div>
+        <div class="up-next-artist" id="next-artist">Ayo request lagu sekarang!</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Audio Notice Banner (Muncul jika browser memerlukan klik untuk mengizinkan suara) -->
+  <div id="audio-notice" class="audio-notice" onclick="unlockAudio(event)">
+    <span style="font-size: 16px;">🔊</span>
+    <span id="audio-notice-text">Klik di mana saja untuk mengaktifkan suara</span>
+  </div>
+
+  <!-- Audio Player YouTube Aktif (Transparan di viewport agar Chromium tidak meng-suspend playback) -->
+  <div id="player-container">
+    <div id="yt-player"></div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    // Ambil parameter URL untuk tema kustom & font
+    const urlParams = new URLSearchParams(window.location.search);
+    const theme = urlParams.get('theme');
+    if (theme) document.body.className = `theme-${theme}`;
+    const scale = urlParams.get('scale');
+    if (scale) document.getElementById('overlay-wrapper').style.transform = `scale(${scale})`;
+
+    // Referensi Elemen DOM
+    const npContainer = document.getElementById('np-container');
+    const npTitle = document.getElementById('np-title');
+    const npArtist = document.getElementById('np-artist');
+    const npCover = document.getElementById('np-cover');
+    const npBadge = document.getElementById('np-badge');
+    const npUser = document.getElementById('np-user');
+
+    const nextCard = document.getElementById('up-next-card');
+    const nextTitle = document.getElementById('next-title');
+    const nextArtist = document.getElementById('next-artist');
+    const nextCover = document.getElementById('next-cover');
+    const nextUser = document.getElementById('next-user');
+
+    const toast = document.getElementById('request-toast');
+    const toastText = document.getElementById('toast-text');
+    const audioNotice = document.getElementById('audio-notice');
+
+    let ytPlayer = null;
+    let isPlayerReady = false;
+    let pendingTrackId = null;
+    let currentPlayingVideoId = null;
+    let isAudioUnlocked = false;
+
+    // Inisialisasi YouTube Player
+    window.onYouTubeIframeAPIReady = function() {
+      console.log('[Overlay] YouTube IFrame API Ready, menginisialisasi player...');
+      ytPlayer = new YT.Player('yt-player', {
+        height: '140',
+        width: '240',
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          disablekb: 1,
+          enablejsapi: 1,
+          playsinline: 1,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
+        }
+      });
+    };
+
+    function onPlayerReady(event) {
+      console.log('[Overlay] ✅ YouTube Player siap memutar suara');
+      isPlayerReady = true;
+      try {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(100);
+      } catch (e) {}
+
+      // Jika ada track yang menunggu sebelum player siap, putar sekarang juga
+      if (pendingTrackId) {
+        playTrack(pendingTrackId);
+      }
+    }
+
+    function playTrack(videoId) {
+      if (!videoId) return;
+      pendingTrackId = videoId;
+
+      if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoById !== 'function') {
+        console.log('[Overlay] Menunggu YouTube player siap untuk:', videoId);
+        return;
+      }
+
+      if (currentPlayingVideoId === videoId) {
+        // Track sama sudah di-load, pastikan berjalan
+        try {
+          const state = ytPlayer.getPlayerState();
+          if (state !== YT.PlayerState.PLAYING && state !== YT.PlayerState.BUFFERING) {
+            ytPlayer.playVideo();
+          }
+        } catch (e) {}
+        return;
+      }
+
+      console.log('[Overlay] 🎵 Memutar lagu baru di YouTube (ID:', videoId, ')');
+      currentPlayingVideoId = videoId;
+
+      try {
+        ytPlayer.loadVideoById({
+          videoId: videoId,
+          startSeconds: 0
+        });
+        ytPlayer.unMute();
+        ytPlayer.setVolume(100);
+        ytPlayer.playVideo();
+        setPlayingVisuals(true);
+      } catch (err) {
+        console.error('[Overlay] Gagal memuat video:', err);
+      }
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        setPlayingVisuals(true);
+        // Otomatis coba unmute saat lagu mulai bermain
+        try {
+          if (ytPlayer.isMuted()) {
+            ytPlayer.unMute();
+          }
+          ytPlayer.setVolume(100);
+        } catch (e) {}
+        hideAudioNotice();
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        // Jika ter-pause karena browser autoplay policy
+        console.log('[Overlay] Player state: PAUSED');
+      } else if (event.data === YT.PlayerState.ENDED) {
+        console.log('[Overlay] Lagu selesai, melangkah ke lagu berikutnya...');
+        currentPlayingVideoId = null;
+        pendingTrackId = null;
+        fetch('/api/skip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: 'System', isModerator: true })
+        }).catch(err => console.error(err));
+      }
+    }
+
+    function onPlayerError(event) {
+      console.warn('[Overlay] ⚠️ Player error code:', event.data, '-> otomatis melewati lagu...');
+      currentPlayingVideoId = null;
+      pendingTrackId = null;
+      fetch('/api/skip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: 'System', isModerator: true })
+      }).catch(err => console.error(err));
+    }
+
+    function setPlayingVisuals(active) {
+      if (active) {
+        npContainer.classList.add('playing');
+      } else {
+        npContainer.classList.remove('playing');
+      }
+    }
+
+    function unlockAudio(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      isAudioUnlocked = true;
+      hideAudioNotice();
+      if (ytPlayer) {
+        try {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+          ytPlayer.playVideo();
+        } catch (e) {}
+      }
+    }
+
+    function hideAudioNotice() {
+      if (audioNotice) {
+        audioNotice.style.opacity = '0';
+        audioNotice.style.pointerEvents = 'none';
+        setTimeout(() => { audioNotice.style.display = 'none'; }, 300);
+      }
+    }
+
+    // Klik di mana saja pada layar browser akan membuka izin suara otomatis
+    document.addEventListener('click', () => {
+      unlockAudio();
+    });
+    document.addEventListener('keydown', () => {
+      unlockAudio();
+    });
+
+    function showToast(message) {
+      toastText.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4500);
+    }
+
+    // Polling status dari server lokal setiap 1 detik
+    async function syncStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // 1. Perbarui Now Playing
+        if (data.nowPlaying) {
+          const track = data.nowPlaying;
+          npTitle.innerText = track.title || 'Judul Lagu';
+          npArtist.innerText = track.artist || 'Artis';
+          if (track.thumbnail) npCover.src = track.thumbnail;
+
+          if (track.requestedBy) {
+            npBadge.style.display = 'inline-flex';
+            npUser.innerText = `Req: @${track.requestedBy}`;
+          } else {
+            npBadge.style.display = 'none';
+          }
+
+          // Trigger pemutaran audio
+          playTrack(track.id);
+
+        } else {
+          npTitle.innerText = 'Antrean Selesai';
+          npArtist.innerText = 'Komen !play [lagu] untuk request';
+          npBadge.style.display = 'none';
+          setPlayingVisuals(false);
+          currentPlayingVideoId = null;
+          pendingTrackId = null;
+          if (isPlayerReady && ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+            try { ytPlayer.stopVideo(); } catch (e) {}
+          }
+        }
+
+        // 2. Perbarui Up Next (Kartu Kedua)
+        if (data.queue && data.queue.length > 0) {
+          const next = data.queue[0];
+          nextCard.classList.remove('hidden');
+          nextTitle.innerText = next.title || 'Lagu Berikutnya';
+          nextArtist.innerText = next.artist || 'Artis';
+          if (next.thumbnail) nextCover.src = next.thumbnail;
+          nextUser.innerText = next.requestedBy ? `@${next.requestedBy}` : '';
+        } else {
+          nextCard.classList.remove('hidden');
+          nextTitle.innerText = 'Antrean Kosong';
+          nextArtist.innerText = 'Yuk request lagu lewat chat live!';
+          nextCover.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&auto=format&fit=crop&q=80';
+          nextUser.innerText = '';
+        }
+
+        // 3. Tampilkan notifikasi jika ada toast baru dari server
+        if (data.latestToast && data.latestToast !== window.lastToastId) {
+          window.lastToastId = data.latestToast;
+          showToast(data.latestToastMessage || 'Request baru diterima!');
+        }
+
+      } catch (err) {
+        // console.error('[Overlay Sync Error]', err);
+      }
+    }
+
+    // Jalankan loop sinkronisasi
+    setInterval(syncStatus, 1000);
+    syncStatus();
+  </script>
+</body>
+</html>
+

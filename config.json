@@ -1,0 +1,28 @@
+{
+  "tiktokUsername": "xolt.san",
+  "commandPrefix": "!play",
+  "commandAliases": [
+    "!request",
+    "!sr",
+    "!lagu"
+  ],
+  "revokePrefix": "!revoke",
+  "revokeAliases": [
+    "!cancel",
+    "!batal"
+  ],
+  "skipPrefix": "!skip",
+  "skipAliases": [
+    "!next",
+    "!lewati"
+  ],
+  "allowViewerSkip": true,
+  "skipVotesNeeded": 2,
+  "cooldownSeconds": 60,
+  "maxQueueLength": 25,
+  "port": 3456,
+  "sessionId": "",
+  "maxSongDurationMinutes": 8,
+  "theme": "glass-blue",
+  "autoPlay": true
+}
