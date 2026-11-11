@@ -477,18 +477,6 @@
       100% { transform: translateX(-50%) scale(1); }
     }
 
-    /* Audio Player YouTube Aktif (Dipertahankan di dalam viewport agar tidak dimute oleh Chromium) */
-    #player-container {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      width: 200px;
-      height: 120px;
-      opacity: 0.01;
-      pointer-events: none;
-      z-index: -1;
-    }
-
     /* ============================================================
        PUSAT INTERAKSI: ALERT BOX STYLES (POPUP KARTU OBS)
        ============================================================ */
@@ -913,12 +901,8 @@
     <span id="audio-notice-text">Klik di mana saja untuk mengaktifkan suara</span>
   </div>
 
-  <!-- Audio Player YouTube Aktif (Transparan di viewport agar Chromium tidak meng-suspend playback) -->
-  <div id="player-container">
-    <div id="yt-player"></div>
-  </div>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
+  <!-- Native Audio Player (Bypass YouTube IFrame embed restrictions & Error 150) -->
+  <audio id="native-audio" preload="auto" playsinline style="display: none;"></audio>
   <script>
     // Ambil parameter URL untuk tema kustom & font
     const urlParams = new URLSearchParams(window.location.search);
@@ -1094,52 +1078,63 @@
     const toastText = document.getElementById('toast-text');
     const audioNotice = document.getElementById('audio-notice');
 
-    let ytPlayer = null;
-    let isPlayerReady = false;
+    const nativeAudio = document.getElementById('native-audio');
     let pendingTrackId = null;
     let currentPlayingVideoId = null;
     let isAudioUnlocked = false;
     let currentCandidates = [];
     let currentCandidateIndex = 0;
 
-    // Inisialisasi YouTube Player
-    window.onYouTubeIframeAPIReady = function() {
-      console.log('[Overlay] YouTube IFrame API Ready, menginisialisasi player...');
-      ytPlayer = new YT.Player('yt-player', {
-        height: '240',
-        width: '240',
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          disablekb: 1,
-          enablejsapi: 1,
-          playsinline: 1,
-          iv_load_policy: 3,
-          modestbranding: 1,
-          rel: 0,
-          origin: window.location.origin,
-          widget_referrer: window.location.href
-        },
-        events: {
-          onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
-          onError: onPlayerError
+    // Event Listener Native Audio
+    if (nativeAudio) {
+      nativeAudio.addEventListener('playing', () => {
+        setPlayingVisuals(true);
+        isAudioUnlocked = true;
+        hideAudioNotice();
+      });
+
+      nativeAudio.addEventListener('pause', () => {
+        if (!nativeAudio.ended && !currentPlayingVideoId) {
+          setPlayingVisuals(false);
         }
       });
-    };
 
-    function onPlayerReady(event) {
-      console.log('[Overlay] ✅ YouTube Player siap memutar suara');
-      isPlayerReady = true;
-      try {
-        ytPlayer.unMute();
-        ytPlayer.setVolume(100);
-      } catch (e) {}
+      nativeAudio.addEventListener('ended', () => {
+        console.log('[Overlay] 🏁 Lagu selesai diputar, memanggil lagu berikutnya...');
+        currentPlayingVideoId = null;
+        pendingTrackId = null;
+        setPlayingVisuals(false);
+        fetch('/api/skip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: 'System', isModerator: true, reason: 'ENDED' })
+        }).catch(err => console.error(err));
+      });
 
-      // Jika ada track yang menunggu sebelum player siap, putar sekarang juga
-      if (pendingTrackId) {
-        playTrack(pendingTrackId);
-      }
+      nativeAudio.addEventListener('error', (e) => {
+        console.warn('[Overlay] ⚠️ Audio stream error pada video ID:', currentPlayingVideoId);
+        
+        // Otomatis coba kandidat alternatif jika ada
+        if (currentCandidates && currentCandidates.length > 0 && currentCandidateIndex < currentCandidates.length - 1) {
+          currentCandidateIndex++;
+          const next = currentCandidates[currentCandidateIndex];
+          console.log(`[Overlay] 🔄 Mencoba video alternatif #${currentCandidateIndex + 1} (${next.id}): "${next.title}"`);
+          currentPlayingVideoId = next.id;
+          nativeAudio.src = `/api/stream/audio?id=${encodeURIComponent(next.id)}`;
+          nativeAudio.play().catch(() => showAudioNotice());
+          return;
+        }
+
+        console.warn('[Overlay] Semua kandidat gagal diputar, otomatis melewati lagu...');
+        currentPlayingVideoId = null;
+        pendingTrackId = null;
+        setPlayingVisuals(false);
+        fetch('/api/skip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: 'System', isModerator: true, reason: 'ERROR', videoId: currentPlayingVideoId })
+        }).catch(err => console.error(err));
+      });
     }
 
     function playTrack(trackData) {
@@ -1153,106 +1148,31 @@
         currentCandidateIndex = foundIdx >= 0 ? foundIdx : 0;
       }
 
+      if (currentPlayingVideoId === videoId && nativeAudio && !nativeAudio.paused && !nativeAudio.ended) {
+        return;
+      }
+
+      console.log('[Overlay] 🎵 Memutar lagu via Native Audio Stream (ID:', videoId, ')');
+      currentPlayingVideoId = videoId;
       pendingTrackId = videoId;
 
-      if (!isPlayerReady || !ytPlayer || typeof ytPlayer.loadVideoById !== 'function') {
-        console.log('[Overlay] Menunggu YouTube player siap untuk:', videoId);
-        return;
-      }
-
-      if (currentPlayingVideoId === videoId) {
-        // Track sama sudah di-load, pastikan berjalan
-        try {
-          const state = ytPlayer.getPlayerState();
-          if (state !== YT.PlayerState.PLAYING && state !== YT.PlayerState.BUFFERING) {
-            ytPlayer.playVideo();
-          }
-        } catch (e) {}
-        return;
-      }
-
-      console.log('[Overlay] 🎵 Memutar lagu baru di YouTube (ID:', videoId, ')');
-      currentPlayingVideoId = videoId;
-
-      try {
-        ytPlayer.loadVideoById({
-          videoId: videoId,
-          startSeconds: 0
-        });
-        ytPlayer.unMute();
-        ytPlayer.setVolume(100);
-        ytPlayer.playVideo();
+      if (nativeAudio) {
+        nativeAudio.src = `/api/stream/audio?id=${encodeURIComponent(videoId)}`;
+        nativeAudio.volume = 1.0;
         setPlayingVisuals(true);
-      } catch (err) {
-        console.error('[Overlay] Gagal memuat video:', err);
-      }
-    }
 
-    function onPlayerStateChange(event) {
-      if (event.data === YT.PlayerState.PLAYING) {
-        setPlayingVisuals(true);
-        // Otomatis coba unmute saat lagu mulai bermain
-        try {
-          ytPlayer.unMute();
-          ytPlayer.setVolume(100);
-        } catch (e) {}
-
-        // Periksa apakah audio browser masih dibisukan karena autoplay policy
-        setTimeout(() => {
-          try {
-            if (ytPlayer && typeof ytPlayer.isMuted === 'function' && ytPlayer.isMuted() && !isAudioUnlocked) {
-              showAudioNotice();
-            } else if (isAudioUnlocked) {
-              hideAudioNotice();
-            }
-          } catch (e) {}
-        }, 600);
-      } else if (event.data === YT.PlayerState.PAUSED) {
-        // Jika ter-pause karena browser autoplay policy
-        console.log('[Overlay] Player state: PAUSED');
-      } else if (event.data === YT.PlayerState.ENDED) {
-        console.log('[Overlay] Lagu selesai, melangkah ke lagu berikutnya...');
-        currentPlayingVideoId = null;
-        pendingTrackId = null;
-        currentCandidates = [];
-        fetch('/api/skip', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user: 'System', isModerator: true, reason: 'ENDED' })
-        }).catch(err => console.error(err));
-      }
-    }
-
-    function onPlayerError(event) {
-      console.warn('[Overlay] ⚠️ Player error code:', event.data, 'pada video ID:', currentPlayingVideoId);
-      
-      // Jika video ini terkena pembatasan embed (error 150/101) atau error lain, otomatis coba kandidat berikutnya!
-      if (currentCandidates && currentCandidates.length > 0 && currentCandidateIndex < currentCandidates.length - 1) {
-        currentCandidateIndex++;
-        const next = currentCandidates[currentCandidateIndex];
-        console.log(`[Overlay] 🔄 Mencoba video kandidat alternatif #${currentCandidateIndex + 1} (${next.id}): "${next.title}"`);
-        currentPlayingVideoId = next.id;
-        try {
-          ytPlayer.loadVideoById({
-            videoId: next.id,
-            startSeconds: 0
+        const playPromise = nativeAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            isAudioUnlocked = true;
+            hideAudioNotice();
+            setPlayingVisuals(true);
+          }).catch((err) => {
+            console.warn('[Overlay] Autoplay menunggu izin pengguna:', err);
+            showAudioNotice();
           });
-          ytPlayer.unMute();
-          ytPlayer.setVolume(100);
-          ytPlayer.playVideo();
-          return;
-        } catch (e) {}
+        }
       }
-
-      console.warn('[Overlay] Semua kandidat gagal diputar, otomatis melewati lagu...');
-      currentPlayingVideoId = null;
-      pendingTrackId = null;
-      currentCandidates = [];
-      fetch('/api/skip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: 'System', isModerator: true, reason: 'ERROR', errorCode: event.data, videoId: currentPlayingVideoId })
-      }).catch(err => console.error(err));
     }
 
     function setPlayingVisuals(active) {
@@ -1283,12 +1203,8 @@
       if (e && e.stopPropagation) e.stopPropagation();
       isAudioUnlocked = true;
       hideAudioNotice();
-      if (ytPlayer) {
-        try {
-          ytPlayer.unMute();
-          ytPlayer.setVolume(100);
-          ytPlayer.playVideo();
-        } catch (e) {}
+      if (nativeAudio && nativeAudio.paused && currentPlayingVideoId) {
+        nativeAudio.play().catch(err => console.error(err));
       }
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1357,8 +1273,8 @@
           setPlayingVisuals(false);
           currentPlayingVideoId = null;
           pendingTrackId = null;
-          if (isPlayerReady && ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-            try { ytPlayer.stopVideo(); } catch (e) {}
+          if (nativeAudio && !nativeAudio.paused) {
+            try { nativeAudio.pause(); nativeAudio.currentTime = 0; } catch (e) {}
           }
         }
 
@@ -1526,8 +1442,8 @@
       video.muted = false;
 
       // Turunkan volume musik Limusic agar beat JJ terdengar dominan (Audio Ducking)
-      if (ytPlayer && isPlayerReady) {
-        try { ytPlayer.setVolume(12); } catch(e) {}
+      if (nativeAudio) {
+        try { nativeAudio.volume = 0.12; } catch(e) {}
       }
 
       // Mainkan video & synthesizer SFX
@@ -1594,8 +1510,8 @@
         } catch(e) {}
 
         // Kembalikan volume Limusic ke 100%
-        if (ytPlayer && isPlayerReady) {
-          try { ytPlayer.setVolume(100); } catch(e) {}
+        if (nativeAudio) {
+          try { nativeAudio.volume = 1.0; } catch(e) {}
         }
 
         if (callback) callback();

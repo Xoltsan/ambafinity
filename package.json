@@ -8,6 +8,7 @@
     "start": "node server.mjs"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^5.2.1",
     "tiktok-live-connector": "^2.5.0"
   }
 }

@@ -4,9 +4,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { TikTokLiveConnection, WebcastEvent } from 'tiktok-live-connector';
+import { Ytdl, chooseFormat } from '@distube/ytdl-core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const ytdlClient = new Ytdl();
+const videoInfoCache = new Map();
 
 // ============================================================================
 // 1. KONFIGURASI SISTEM & MASTER SWITCHES
@@ -286,7 +290,35 @@ async function searchYouTube(query) {
       };
     }
 
-    // Prioritaskan pencarian lagu dengan versi lirik / audio untuk menghindari blokir embed VEVO (Error 150)
+    // 2. Pencarian akurat & cepat via @distube/ytdl-core native search
+    try {
+      const results = await ytdlClient.search(query.trim(), { limit: 8 });
+      if (results && results.length > 0) {
+        const candidates = results.map(item => {
+          const duration = item.lengthSeconds
+            ? `${Math.floor(item.lengthSeconds / 60)}:${String(item.lengthSeconds % 60).padStart(2, '0')}`
+            : '0:00';
+          const thumb = item.thumbnails && item.thumbnails.length > 0
+            ? item.thumbnails[item.thumbnails.length - 1].url
+            : `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
+          return {
+            id: item.id,
+            title: item.title,
+            artist: item.author?.name || 'YouTube',
+            duration,
+            thumbnail: thumb,
+            isVevo: false
+          };
+        });
+
+        const primarySong = { ...candidates[0], candidates };
+        return primarySong;
+      }
+    } catch (searchErr) {
+      console.warn('[Search] Ytdl search fallback to scraping:', searchErr.message);
+    }
+
+    // 3. Fallback: Scraping YouTube search jika ytdl search tidak membuahkan hasil
     let searchQuery = query.trim();
     const lower = searchQuery.toLowerCase();
     if (!lower.includes('lyrics') && !lower.includes('lirik') && !lower.includes('audio') && !lower.includes('topic')) {
@@ -322,7 +354,6 @@ async function searchYouTube(query) {
         const thumbnails = vr.thumbnail?.thumbnails || [];
         const thumbnail = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : '';
 
-        // Deteksi apakah video dari VEVO (yang selalu memblokir embedding di website pihak ketiga)
         const isVevo = (artist + ' ' + title).toLowerCase().includes('vevo');
 
         const item = {
@@ -336,7 +367,6 @@ async function searchYouTube(query) {
 
         candidates.push(item);
 
-        // Utamakan video non-VEVO sebagai primary song agar 100% bisa di-embed di overlay
         if (!primarySong && !isVevo) {
           primarySong = { ...item };
         }
@@ -344,7 +374,6 @@ async function searchYouTube(query) {
       }
     }
 
-    // Jika semua hasil kebetulan VEVO, ambil kandidat pertama
     if (!primarySong && candidates.length > 0) {
       primarySong = { ...candidates[0] };
     }
@@ -924,6 +953,111 @@ const server = http.createServer(async (req, res) => {
         }
       });
     });
+  }
+
+  // 2f. Streaming Audio YouTube Native (Bypass Error 150 & Pembatasan Embed YouTube IFrame)
+  if (pathname === '/api/stream/audio') {
+    const videoId = parsedUrl.searchParams.get('id') || (nowPlaying ? nowPlaying.id : null);
+    if (!videoId) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Video ID diperlukan' }));
+      return;
+    }
+
+    try {
+      const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+      // Ambil format terbaik dari cache atau query baru
+      let cached = videoInfoCache.get(videoId);
+      if (!cached || (Date.now() - cached.timestamp > 30 * 60 * 1000)) {
+        const rawInfo = await ytdlClient.getInfo(videoUrl);
+        const format = chooseFormat(rawInfo.formats, {
+          filter: { hasAudio: true, hasVideo: false },
+          quality: 'highestaudio'
+        });
+        cached = { format, timestamp: Date.now() };
+        videoInfoCache.set(videoId, cached);
+      }
+
+      const format = cached.format;
+      const mimeType = format.mimeType || 'audio/webm';
+      const rangeHeader = req.headers.range;
+
+      if (req.method === 'HEAD') {
+        const headers = {
+          'Content-Type': mimeType,
+          'Accept-Ranges': 'bytes',
+          'Access-Control-Allow-Origin': '*'
+        };
+        if (format.contentLength) {
+          headers['Content-Length'] = format.contentLength;
+        }
+        res.writeHead(200, headers);
+        res.end();
+        return;
+      }
+
+      if (rangeHeader && format.contentLength) {
+        const parts = rangeHeader.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const total = parseInt(format.contentLength, 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : total - 1;
+        const chunksize = (end - start) + 1;
+
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${total}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': mimeType,
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=3600'
+        });
+
+        const stream = ytdlClient.download(videoUrl, {
+          format,
+          range: { start, end },
+          highWaterMark: 1 << 23
+        });
+
+        stream.pipe(res);
+        req.on('close', () => stream.destroy());
+        stream.on('error', (err) => {
+          console.error(`[AudioStream Range Error ${videoId}]:`, err.message);
+          if (!res.headersSent) res.writeHead(500);
+          res.end();
+        });
+      } else {
+        const headers = {
+          'Content-Type': mimeType,
+          'Accept-Ranges': 'bytes',
+          'Access-Control-Allow-Origin': '*'
+        };
+        if (format.contentLength) {
+          headers['Content-Length'] = format.contentLength;
+        }
+        res.writeHead(200, headers);
+
+        const stream = ytdlClient.download(videoUrl, {
+          format,
+          highWaterMark: 1 << 23
+        });
+
+        stream.pipe(res);
+        req.on('close', () => stream.destroy());
+        stream.on('error', (err) => {
+          console.error(`[AudioStream Error ${videoId}]:`, err.message);
+          if (!res.headersSent) res.writeHead(500);
+          res.end();
+        });
+      }
+    } catch (err) {
+      console.error(`[AudioStream Init Error ${videoId}]:`, err.message);
+      if (!res.headersSent) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+      }
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
   }
 
   // 3. API Status (/api/status)
