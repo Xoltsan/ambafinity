@@ -220,6 +220,7 @@ function triggerInteraction(interaction, eventData = {}) {
 // ============================================================================
 // 3. STATE PEMUTAR MUSIK & ANTREAN
 // ============================================================================
+const SERVER_START_TIME = Date.now();
 let nowPlaying = null;
 let queue = [];
 let userCooldowns = new Map();
@@ -726,7 +727,12 @@ const server = http.createServer(async (req, res) => {
         res.end('Gagal memuat overlay');
         return;
       }
-      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.writeHead(200, {
+        'Content-Type': 'text/html',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       res.end(data);
     });
     return;
@@ -741,7 +747,12 @@ const server = http.createServer(async (req, res) => {
         res.end('Gagal memuat dashboard');
         return;
       }
-      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.writeHead(200, {
+        'Content-Type': 'text/html',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       res.end(data);
     });
     return;
@@ -870,6 +881,7 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/status' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
+      serverStartTime: SERVER_START_TIME,
       nowPlaying,
       queue,
       tiktokConnected,

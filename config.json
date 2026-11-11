@@ -36,8 +36,8 @@
   "autoPlay": true,
   "overlayConfig": {
     "pos": "custom",
-    "x": 733,
-    "y": 131,
+    "x": 565,
+    "y": 483,
     "scale": 1,
     "locked": false
   }

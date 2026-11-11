@@ -703,7 +703,7 @@
       box-shadow: 0 0 60px rgba(244, 63, 94, 0.7), 0 0 100px rgba(56, 189, 248, 0.5);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      z-index: 9999;
+      z-index: 99999 !important;
       opacity: 0;
       pointer-events: none;
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -711,9 +711,10 @@
     }
 
     .jj-modal.show {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, -50%) scale(1);
+      opacity: 1 !important;
+      display: flex !important;
+      pointer-events: auto !important;
+      transform: translate(-50%, -50%) scale(1) !important;
     }
 
     .jj-badge {
@@ -932,6 +933,7 @@
   <div id="alert-box" class="alert-box">
     <div class="alert-media-wrap">
       <img id="alert-media" class="alert-media" src="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif" alt="Alert Media">
+      <video id="alert-media-video" class="alert-media" autoplay playsinline loop muted style="display: none;"></video>
     </div>
     <div class="alert-content">
       <div class="alert-badge" id="alert-badge">INTERAKSI TIKTOK</div>
@@ -1338,6 +1340,17 @@
         if (!res.ok) return;
         const data = await res.json();
 
+        // Auto-Reload jika server di-restart atau ada update baru
+        if (data.serverStartTime) {
+          if (!window.__loadedServerTime) {
+            window.__loadedServerTime = data.serverStartTime;
+          } else if (window.__loadedServerTime !== data.serverStartTime) {
+            console.log('[Overlay] Server update terdeteksi, me-reload halaman overlay...');
+            window.location.reload();
+            return;
+          }
+        }
+
         // 1. Perbarui Now Playing
         if (data.nowPlaying) {
           const track = data.nowPlaying;
@@ -1521,7 +1534,10 @@
       title.innerHTML = alert.title || `🔥 @${alert.user} Mengirim 20 Koin! 🔥`;
       subtitle.innerHTML = alert.message || `⚡ MODE JEDAG-JEDUG MENYALA ABANGKU! ⚡`;
 
-      const videoSrc = alert.videoUrl || alert.media || 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4';
+      let videoSrc = alert.videoUrl || alert.media || 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.mp4';
+      if (videoSrc.startsWith('/')) {
+        videoSrc = window.location.origin + videoSrc;
+      }
       video.src = videoSrc;
       video.currentTime = 0;
       video.volume = 1.0;
@@ -1655,7 +1671,15 @@
         return;
       }
 
-      if (alert.type === 'jj' || alert.category === 'jj' || alert.type === 'video') {
+      function isJJVideoAlert(a) {
+        if (!a) return false;
+        if (a.type === 'jj' || a.category === 'jj' || a.type === 'video') return true;
+        const m = (a.media || a.videoUrl || '').toLowerCase();
+        if (m.endsWith('.mp4') || m.endsWith('.webm') || m.includes('/assets/')) return true;
+        return false;
+      }
+
+      if (isJJVideoAlert(alert)) {
         runJJVideoAlert(alert, () => {
           setTimeout(processNextAlert, 600);
         });
@@ -1664,6 +1688,7 @@
 
       const box = document.getElementById('alert-box');
       const media = document.getElementById('alert-media');
+      const mediaVideo = document.getElementById('alert-media-video');
       const badge = document.getElementById('alert-badge');
       const title = document.getElementById('alert-title');
       const msg = document.getElementById('alert-msg');
@@ -1672,8 +1697,18 @@
       badge.innerText = alert.name ? alert.name.toUpperCase() : 'INTERAKSI TIKTOK';
       title.innerText = alert.title || 'Pemicu Baru!';
       msg.innerText = alert.message || '';
-      if (alert.media) {
+
+      const isVideoMedia = alert.media && (alert.media.endsWith('.mp4') || alert.media.endsWith('.webm') || alert.media.includes('/assets/'));
+      if (isVideoMedia && mediaVideo) {
+        mediaVideo.src = alert.media.startsWith('/') ? (window.location.origin + alert.media) : alert.media;
+        mediaVideo.style.display = 'block';
+        media.style.display = 'none';
+        media.parentElement.style.display = 'flex';
+        try { mediaVideo.play(); } catch(e) {}
+      } else if (alert.media) {
         media.src = alert.media;
+        media.style.display = 'block';
+        if (mediaVideo) mediaVideo.style.display = 'none';
         media.parentElement.style.display = 'flex';
       } else {
         media.parentElement.style.display = 'none';
