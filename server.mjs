@@ -286,7 +286,14 @@ async function searchYouTube(query) {
       };
     }
 
-    const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query);
+    // Prioritaskan pencarian lagu dengan versi lirik / audio untuk menghindari blokir embed VEVO (Error 150)
+    let searchQuery = query.trim();
+    const lower = searchQuery.toLowerCase();
+    if (!lower.includes('lyrics') && !lower.includes('lirik') && !lower.includes('audio') && !lower.includes('topic')) {
+      searchQuery += ' lyrics audio';
+    }
+
+    const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(searchQuery);
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -315,18 +322,31 @@ async function searchYouTube(query) {
         const thumbnails = vr.thumbnail?.thumbnails || [];
         const thumbnail = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : '';
 
+        // Deteksi apakah video dari VEVO (yang selalu memblokir embedding di website pihak ketiga)
+        const isVevo = (artist + ' ' + title).toLowerCase().includes('vevo');
+
         const item = {
           id: videoId,
           title,
           artist,
           duration,
-          thumbnail
+          thumbnail,
+          isVevo
         };
 
         candidates.push(item);
-        if (!primarySong) primarySong = { ...item };
-        if (candidates.length >= 6) break;
+
+        // Utamakan video non-VEVO sebagai primary song agar 100% bisa di-embed di overlay
+        if (!primarySong && !isVevo) {
+          primarySong = { ...item };
+        }
+        if (candidates.length >= 8) break;
       }
+    }
+
+    // Jika semua hasil kebetulan VEVO, ambil kandidat pertama
+    if (!primarySong && candidates.length > 0) {
+      primarySong = { ...candidates[0] };
     }
 
     if (primarySong) {
