@@ -1,9 +1,9 @@
 @echo off
-title Limusic TikTok Live Request and Vinyl Overlay
+title AmbaFinity - TikTok Live Pusat Interaksi and Vinyl Overlay Suite
 cd /d "%~dp0"
 
 echo ============================================================
-echo   LIMUSIC TIKTOK LIVE REQUEST AND VINYL OVERLAY SUITE
+echo   AMBAFINITY - TIKTOK LIVE PUSAT INTERAKSI AND VINYL SUITE
 echo ============================================================
 echo.
 
@@ -18,7 +18,7 @@ if not exist "node_modules\" (
     )
 )
 
-echo Memulai server Limusic TikTok Live...
+echo Memulai server AmbaFinity...
 start http://localhost:3456/control
 node server.mjs
 pause

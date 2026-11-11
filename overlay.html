@@ -453,6 +453,164 @@
       pointer-events: none;
       z-index: -999;
     }
+
+    /* ============================================================
+       PUSAT INTERAKSI: ALERT BOX STYLES (POPUP KARTU OBS)
+       ============================================================ */
+    .alert-box {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      width: 380px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transform: translateX(450px) scale(0.9);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .alert-box.show {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+
+    .alert-media-wrap {
+      width: 68px;
+      height: 68px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    .alert-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .alert-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .alert-badge {
+      font-size: 10px;
+      font-weight: 800;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .alert-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .alert-msg {
+      font-size: 12px;
+      font-weight: 500;
+      color: #cbd5e1;
+      line-height: 1.3;
+    }
+
+    .alert-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #ec4899);
+      width: 100%;
+      transition: width linear;
+    }
+
+    /* ============================================================
+       PUSAT INTERAKSI: SPIN ROULETTE WHEEL OVERLAY
+       ============================================================ */
+    .roulette-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid rgba(236, 72, 153, 0.6);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(236, 72, 153, 0.35);
+      backdrop-filter: blur(25px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 10000;
+    }
+
+    .roulette-box.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .roulette-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #f43f5e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+    }
+
+    .roulette-wheel-wrapper {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .roulette-pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 26px;
+      color: #facc15;
+      z-index: 10;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.8));
+    }
+
+    .roulette-result {
+      font-size: 16px;
+      font-weight: 800;
+      color: #38bdf8;
+      text-align: center;
+      min-height: 24px;
+    }
   </style>
 </head>
 <body class="theme-default">
@@ -534,6 +692,33 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- ============================================================
+       3. PUSAT INTERAKSI: KARTU ALERT VISUAL OBS (POPUP ANIMASI)
+       ============================================================ -->
+  <div id="alert-box" class="alert-box">
+    <div class="alert-media-wrap">
+      <img id="alert-media" class="alert-media" src="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif" alt="Alert Media">
+    </div>
+    <div class="alert-content">
+      <div class="alert-badge" id="alert-badge">INTERAKSI TIKTOK</div>
+      <div class="alert-title" id="alert-title">User memicu interaksi!</div>
+      <div class="alert-msg" id="alert-msg">Terima kasih banyak!</div>
+    </div>
+    <div class="alert-progress" id="alert-progress"></div>
+  </div>
+
+  <!-- ============================================================
+       4. PUSAT INTERAKSI: ROULETTE WHEEL (RODA KEBERUNTUNGAN)
+       ============================================================ -->
+  <div id="roulette-box" class="roulette-box">
+    <div class="roulette-title" id="roulette-title">🎡 RODA KEBERUNTUNGAN</div>
+    <div class="roulette-wheel-wrapper">
+      <div class="roulette-pointer">▼</div>
+      <canvas id="roulette-canvas" width="300" height="300"></canvas>
+    </div>
+    <div class="roulette-result" id="roulette-result">Memutar...</div>
   </div>
 
   <!-- Audio Notice Banner (Muncul jika browser memerlukan klik untuk mengizinkan suara) -->
@@ -798,9 +983,243 @@
       }
     }
 
-    // Jalankan loop sinkronisasi
+    // Jalankan loop sinkronisasi status lagu
     setInterval(syncStatus, 1000);
     syncStatus();
+
+    // ============================================================
+    // PUSAT INTERAKSI: SFX SYNTHESIZER, TTS & ALERT QUEUE
+    // ============================================================
+    function playSynthesizerSFX(type) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        if (type === 'bell' || type === 'chime') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.start(now);
+          osc.stop(now + 0.6);
+        } else if (type === 'fanfare') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.12);
+          osc.frequency.setValueAtTime(783.99, now + 0.24);
+          osc.frequency.setValueAtTime(1046.50, now + 0.36);
+          gain.gain.setValueAtTime(0.45, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+          osc.start(now);
+          osc.stop(now + 1.2);
+        } else if (type === 'pop') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.1);
+          gain.gain.setValueAtTime(0.6, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(987.77, now);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        }
+      } catch(e) {}
+    }
+
+    function speakTTS(text) {
+      if (!window.speechSynthesis || !text) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'id-ID';
+        utter.rate = 1.05;
+        utter.pitch = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const idVoice = voices.find(v => v.lang && (v.lang.includes('id') || v.lang.includes('ID')));
+        if (idVoice) utter.voice = idVoice;
+        window.speechSynthesis.speak(utter);
+      } catch(e) {}
+    }
+
+    let alertQueue = [];
+    let isAlertActive = false;
+
+    function enqueueAlert(alertData) {
+      alertQueue.push(alertData);
+      if (!isAlertActive) processNextAlert();
+    }
+
+    function processNextAlert() {
+      if (alertQueue.length === 0) {
+        isAlertActive = false;
+        return;
+      }
+
+      isAlertActive = true;
+      const alert = alertQueue.shift();
+
+      if (alert.type === 'spin' || alert.category === 'spin') {
+        runSpinRoulette(alert, () => {
+          setTimeout(processNextAlert, 600);
+        });
+        return;
+      }
+
+      const box = document.getElementById('alert-box');
+      const media = document.getElementById('alert-media');
+      const badge = document.getElementById('alert-badge');
+      const title = document.getElementById('alert-title');
+      const msg = document.getElementById('alert-msg');
+      const progress = document.getElementById('alert-progress');
+
+      badge.innerText = alert.name ? alert.name.toUpperCase() : 'INTERAKSI TIKTOK';
+      title.innerText = alert.title || 'Pemicu Baru!';
+      msg.innerText = alert.message || '';
+      if (alert.media) {
+        media.src = alert.media;
+        media.parentElement.style.display = 'flex';
+      } else {
+        media.parentElement.style.display = 'none';
+      }
+
+      playSynthesizerSFX(alert.sfx || 'bell');
+
+      if (alert.tts && alert.ttsText) {
+        setTimeout(() => speakTTS(alert.ttsText), 200);
+      }
+
+      box.classList.add('show');
+      const durationSec = alert.duration || 5;
+
+      progress.style.transition = 'none';
+      progress.style.width = '100%';
+      setTimeout(() => {
+        progress.style.transition = `width ${durationSec}s linear`;
+        progress.style.width = '0%';
+      }, 50);
+
+      setTimeout(() => {
+        box.classList.remove('show');
+        setTimeout(processNextAlert, 600);
+      }, durationSec * 1000);
+    }
+
+    function runSpinRoulette(alert, callback) {
+      const box = document.getElementById('roulette-box');
+      const title = document.getElementById('roulette-title');
+      const result = document.getElementById('roulette-result');
+      const canvas = document.getElementById('roulette-canvas');
+      const ctx = canvas.getContext('2d');
+
+      title.innerText = alert.title || '🎡 RODA KEBERUNTUNGAN';
+      result.innerText = 'Roda sedang berputar...';
+      box.classList.add('show');
+
+      const options = (alert.options && alert.options.length >= 2) ? alert.options : [
+        'Joget TikTok', 'Push Up 5x', 'Minum Air', 'Nyanyi Lagu', 'Zonk!', 'Double Like'
+      ];
+
+      const colors = ['#f43f5e', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16'];
+      const numOptions = options.length;
+      const arcSize = (2 * Math.PI) / numOptions;
+
+      function drawWheel(angle) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = centerX - 10;
+
+        for (let i = 0; i < numOptions; i++) {
+          const startAngle = angle + (i * arcSize);
+          const endAngle = startAngle + arcSize;
+
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#0f172a';
+          ctx.stroke();
+
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate(startAngle + arcSize / 2);
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 12px Plus Jakarta Sans, sans-serif';
+          ctx.shadowColor = 'rgba(0,0,0,0.8)';
+          ctx.shadowBlur = 4;
+          ctx.fillText(options[i], radius - 20, 4);
+          ctx.restore();
+        }
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 24, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#facc15';
+        ctx.stroke();
+      }
+
+      playSynthesizerSFX('fanfare');
+      const spinTime = 4800;
+      const targetRevolutions = 5 + Math.random() * 4;
+      const winningIndex = Math.floor(Math.random() * numOptions);
+      const targetAngle = (targetRevolutions * 2 * Math.PI) + (3 * Math.PI / 2) - (winningIndex * arcSize) - (arcSize / 2);
+      const startTime = performance.now();
+
+      function animateSpin(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / spinTime, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const angle = ease * targetAngle;
+
+        drawWheel(angle);
+
+        if (progress < 1) {
+          requestAnimationFrame(animateSpin);
+        } else {
+          const winner = options[winningIndex];
+          result.innerHTML = `🎉 Hasil: <span style="color:#facc15; font-size:18px;">${winner}</span>`;
+          playSynthesizerSFX('fanfare');
+          speakTTS(`Hasil roda keberuntungan: ${winner}`);
+          setTimeout(() => {
+            box.classList.remove('show');
+            if (callback) callback();
+          }, 3500);
+        }
+      }
+
+      requestAnimationFrame(animateSpin);
+    }
+
+    // Polling event alert dari server
+    async function pollAlerts() {
+      try {
+        const res = await fetch('/api/alerts/poll');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.alerts && data.alerts.length > 0) {
+          data.alerts.forEach(enqueueAlert);
+        }
+      } catch(e) {}
+    }
+
+    setInterval(pollAlerts, 1000);
   </script>
 </body>
 </html>

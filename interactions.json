@@ -1,0 +1,146 @@
+[
+  {
+    "id": "act-1",
+    "name": "Mawar Cinta (Rose Alert & TTS)",
+    "enabled": true,
+    "category": "alert",
+    "trigger": {
+      "type": "gift",
+      "giftName": "Rose",
+      "minCoins": 1
+    },
+    "action": {
+      "type": "alert",
+      "title": "{user} Mengirim Mawar! 🌹",
+      "message": "Terima kasih banyak atas dukungannya!",
+      "media": "https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif",
+      "sfx": "bell",
+      "tts": true,
+      "ttsText": "Makasih banyak {user} atas mawarnya!",
+      "duration": 5
+    }
+  },
+  {
+    "id": "act-2",
+    "name": "TikTok Gift Hype",
+    "enabled": true,
+    "category": "alert",
+    "trigger": {
+      "type": "gift",
+      "giftName": "TikTok",
+      "minCoins": 1
+    },
+    "action": {
+      "type": "alert",
+      "title": "🎵 {user} Mengirim TikTok Gift!",
+      "message": "Siaran makin menyala!",
+      "media": "https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif",
+      "sfx": "fanfare",
+      "tts": true,
+      "ttsText": "Keren banget! Terima kasih {user} atas TikTok giftnya!",
+      "duration": 5
+    }
+  },
+  {
+    "id": "act-3",
+    "name": "Hujan Tap-Tap / Like 50x",
+    "enabled": true,
+    "category": "alert",
+    "trigger": {
+      "type": "like",
+      "likeCount": 50
+    },
+    "action": {
+      "type": "alert",
+      "title": "❤️ {user} Tap-Tap Layar!",
+      "message": "Yuk tap-tap lagi teman-teman!",
+      "media": "https://media.giphy.com/media/l41lT4n6ylgW2hh04/giphy.gif",
+      "sfx": "pop",
+      "tts": false,
+      "ttsText": "",
+      "duration": 4
+    }
+  },
+  {
+    "id": "act-4",
+    "name": "Follower Baru Menyala",
+    "enabled": true,
+    "category": "alert",
+    "trigger": {
+      "type": "follow"
+    },
+    "action": {
+      "type": "alert",
+      "title": "🌟 Pengikut Baru: @{user}!",
+      "message": "Selamat bergabung di live streaming!",
+      "media": "https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif",
+      "sfx": "fanfare",
+      "tts": true,
+      "ttsText": "Selamat bergabung dan terima kasih sudah follow, {user}!",
+      "duration": 5
+    }
+  },
+  {
+    "id": "act-5",
+    "name": "Share Live Stream",
+    "enabled": true,
+    "category": "alert",
+    "trigger": {
+      "type": "share"
+    },
+    "action": {
+      "type": "alert",
+      "title": "📢 @{user} Membagikan Live!",
+      "message": "Terima kasih sudah bantu ramaikan!",
+      "media": "https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif",
+      "sfx": "bell",
+      "tts": false,
+      "ttsText": "",
+      "duration": 4
+    }
+  },
+  {
+    "id": "act-6",
+    "name": "Keystroke Gaming (Tekan Tombol SPACE)",
+    "enabled": true,
+    "category": "keystroke",
+    "trigger": {
+      "type": "chat",
+      "chatKeyword": "!jump"
+    },
+    "action": {
+      "type": "keystroke",
+      "key": "SPACE",
+      "title": "🎮 @{user} Membuat Karakter Lompat!",
+      "message": "Tombol [SPACE] ditekan otomatis!",
+      "sfx": "pop",
+      "tts": false,
+      "ttsText": "",
+      "duration": 3
+    }
+  },
+  {
+    "id": "act-7",
+    "name": "Spin Roda Keberuntungan (Roulette)",
+    "enabled": true,
+    "category": "spin",
+    "trigger": {
+      "type": "chat",
+      "chatKeyword": "!spin"
+    },
+    "action": {
+      "type": "spin",
+      "title": "🎡 Roda Keberuntungan Diputar oleh @{user}!",
+      "options": [
+        "Joget TikTok 10 Detik",
+        "Push Up 5 Kali",
+        "Minum Air Putih",
+        "Nyanyi Lagu Favorit",
+        "Zonk / Lewat!",
+        "Double Like Stream"
+      ],
+      "sfx": "fanfare",
+      "duration": 8
+    }
+  }
+]

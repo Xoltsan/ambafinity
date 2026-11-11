@@ -3,92 +3,196 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Limusic TikTok Live Streamer Dashboard</title>
+  <title>AmbaFinity - Pusat Interaksi & TikTok Live Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: #151d2f;
-      --card-border: #1e293b;
-      --primary: #38bdf8;
-      --primary-hover: #0ea5e9;
-      --text: #f8fafc;
+      --bg-dark: #0c0f17;
+      --sidebar-bg: #111625;
+      --card-bg: #161c2e;
+      --card-inner: #0f1422;
+      --card-border: #232d42;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --orange: #f97316;
+      --orange-bg: rgba(249, 115, 22, 0.12);
+      --orange-border: rgba(249, 115, 22, 0.35);
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.15);
       --danger: #ef4444;
-      --success: #10b981;
+      --danger-bg: rgba(239, 68, 68, 0.15);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg-dark);
+      color: var(--text-main);
       font-family: 'Plus Jakarta Sans', sans-serif;
-      padding: 24px;
-      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
+    /* ============================================================
+       SIDEBAR NAV (PERSIS SCREENSHOT INDOFINITY)
+       ============================================================ */
+    .sidebar {
+      width: 250px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--card-border);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      flex-shrink: 0;
+      min-height: 100vh;
     }
 
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .brand-box {
       padding: 20px 24px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-    }
-
-    .header-left {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .app-logo {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      border-radius: 12px;
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
     }
 
-    .title-group h1 { font-size: 20px; font-weight: 800; }
-    .title-group p { font-size: 13px; color: var(--text-muted); }
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
 
-    .obs-url-box {
+    .preset-box {
+      padding: 14px 20px;
+    }
+
+    .preset-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .preset-select {
+      width: 100%;
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .nav-section {
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 10px 12px 4px 12px;
+    }
+
+    .nav-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: #0f172a;
-      padding: 8px 14px;
-      border-radius: 12px;
-      border: 1px solid #334155;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
     }
 
-    .obs-url-box code {
-      font-size: 12.5px;
-      color: #38bdf8;
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
     }
+
+    .nav-item.active {
+      background: var(--orange-bg);
+      border: 1px solid var(--orange-border);
+      color: #fb923c;
+    }
+
+    .nav-item svg, .nav-item span.icon {
+      font-size: 16px;
+      width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ============================================================
+       MAIN CONTENT WRAPPER
+       ============================================================ */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: var(--sidebar-bg);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .tiktok-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 99px;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    .status-dot.connected { background: #10b981; box-shadow: 0 0 8px #10b981; }
 
     .btn {
       padding: 8px 16px;
-      border-radius: 10px;
+      border-radius: 8px;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12.5px;
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -97,536 +201,1195 @@
       gap: 6px;
     }
 
-    .btn-primary { background: var(--primary); color: #0f172a; }
+    .btn-primary { background: var(--primary); color: #0b0f19; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
-    .btn-danger:hover { background: var(--danger); color: white; }
-    .btn-outline { background: #1e293b; color: var(--text); }
+    .btn-orange { background: var(--orange); color: white; }
+    .btn-orange:hover { background: #ea580c; }
+    .btn-green { background: #10b981; color: white; }
+    .btn-green:hover { background: #059669; }
+    .btn-outline { background: #1e293b; color: var(--text-main); border: 1px solid var(--card-border); }
     .btn-outline:hover { background: #334155; }
+    .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .btn-danger:hover { background: var(--danger); color: white; }
 
-    /* Grid Layout */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* Page Container */
+    .page-content {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
       gap: 20px;
     }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    /* Page Header */
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
     }
 
-    .card-title {
-      font-size: 16px;
-      font-weight: 700;
+    .page-header p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    /* Orange Notice Banner (Overlay Alert) */
+    .notice-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--orange-border);
+      border-left: 4px solid var(--orange);
+      border-radius: 14px;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
     }
 
-    /* TikTok Connection Box */
-    .tiktok-box {
+    .notice-left {
       display: flex;
-      gap: 10px;
       align-items: center;
+      gap: 14px;
     }
 
-    .input-text {
-      flex: 1;
-      padding: 10px 14px;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      color: white;
+    .notice-icon {
+      font-size: 26px;
+      color: var(--orange);
+    }
+
+    .notice-text h4 {
       font-size: 14px;
+      font-weight: 700;
+      color: #fb923c;
+    }
+
+    .notice-text p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Master Switches Bar (Sakelar Pusat Interaksi) */
+    .master-switches-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .switch-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-inner);
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 18px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 99px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #38bdf8;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    /* Action Control Bar */
+    .control-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .tabs-group {
+      display: flex;
+      gap: 6px;
+      background: var(--card-bg);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+
+    .tab-btn {
+      padding: 6px 14px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--orange);
+      color: white;
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 340px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 9px 14px 9px 34px;
+      color: white;
+      font-size: 13px;
       font-family: inherit;
       outline: none;
     }
 
-    .input-text:focus { border-color: var(--primary); }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 99px;
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #64748b;
     }
 
-    .status-connected { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .status-disconnected { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-
-    /* Player View */
-    .player-row {
-      display: flex;
-      align-items: center;
+    /* Cards Grid of Interactions */
+    .interactions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 16px;
-      background: #0f172a;
-      padding: 16px;
+    }
+
+    .interaction-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 16px;
-    }
-
-    .player-thumb {
-      width: 72px;
-      height: 72px;
-      border-radius: 12px;
-      object-fit: cover;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-
-    .player-meta {
-      flex: 1;
-      min-width: 0;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 12px;
+      transition: all 0.2s ease;
     }
 
-    .player-title { font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .player-artist { font-size: 13.5px; color: var(--text-muted); font-weight: 500; }
-    .player-badge { font-size: 11px; color: #38bdf8; font-weight: 700; }
-
-    .controls-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 6px;
+    .interaction-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
     }
 
-    /* Queue List */
-    .queue-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 380px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .queue-item {
+    .card-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #0f172a;
-      padding: 10px 14px;
-      border-radius: 12px;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .queue-thumb {
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      object-fit: cover;
-    }
-
-    .queue-info {
-      flex: 1;
-      min-width: 0;
+    .card-info {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      align-items: center;
+      gap: 10px;
     }
 
-    .queue-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .queue-sub { font-size: 11.5px; color: var(--text-muted); }
-
-    /* Live Chat Log */
-    .chat-log {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 250px;
-      overflow-y: auto;
-      background: #0f172a;
-      padding: 12px;
-      border-radius: 14px;
-      font-size: 12.5px;
-    }
-
-    .chat-row {
-      display: flex;
-      gap: 8px;
-      align-items: baseline;
-    }
-
-    .chat-user { font-weight: 700; color: #38bdf8; }
-    .chat-msg { color: #e2e8f0; }
-
-    /* Preview Iframe */
-    .preview-box {
-      border: 1px dashed #334155;
-      border-radius: 16px;
-      overflow: hidden;
-      height: 240px;
-      background: #020617;
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--card-inner);
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
+      font-size: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .preview-box iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .card-title-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
     }
+
+    .badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--card-inner);
+      border: 1px solid var(--card-border);
+      color: #cbd5e1;
+    }
+
+    .badge-trigger { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+    .badge-action { background: rgba(249, 115, 22, 0.12); color: #fb923c; border-color: rgba(249, 115, 22, 0.3); }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+      margin-top: 2px;
+    }
+
+    /* Modal Form */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .modal-card {
+      background: #111625;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 540px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-head h3 { font-size: 18px; font-weight: 800; }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .input-field {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: white;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .input-field:focus { border-color: var(--primary); }
+
+    /* Views */
+    .tab-view { display: none; }
+    .tab-view.active { display: flex; flex-direction: column; gap: 20px; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  
-  <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <div class="app-logo">🎵</div>
-      <div class="title-group">
-        <h1>Limusic TikTok Live Hub</h1>
-        <p>Kontrol Lagu, Queue Penonton, dan Overlay Stream</p>
-      </div>
+  <!-- ============================================================
+       SIDEBAR NAV (PERSIS DESAIN INDOFINITY)
+       ============================================================ -->
+  <aside class="sidebar">
+    <div class="brand-box">
+      <div class="brand-logo">⚡</div>
+      <div class="brand-title">AmbaFinity</div>
     </div>
-    
-    <div class="obs-url-box">
-      <span>OBS Browser Source:</span>
-      <code id="obs-url">http://localhost:3456/overlay</code>
-      <button class="btn btn-outline" onclick="copyObsUrl()">📋 Salin Link</button>
+
+    <div class="preset-box">
+      <div class="preset-label">Preset</div>
+      <select class="preset-select">
+        <option>default</option>
+        <option>gaming-mode</option>
+        <option>chill-stream</option>
+      </select>
     </div>
-  </div>
 
-  <div class="grid">
+    <div class="nav-section">
+      <div class="nav-section-title">Selamat Datang</div>
+      <a class="nav-item" href="#pusat-interaksi" onclick="switchNav('pusat-interaksi', event)">
+        <span class="icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Setup</div>
+      <a class="nav-item active" id="nav-pusat-interaksi" href="#pusat-interaksi" onclick="switchNav('pusat-interaksi', event)">
+        <span class="icon">⚡</span>
+        <span>Pusat Interaksi</span>
+      </a>
+      <a class="nav-item" id="nav-music-hub" href="#music-hub" onclick="switchNav('music-hub', event)">
+        <span class="icon">🎵</span>
+        <span>Music Request & Vinyl</span>
+      </a>
+      <a class="nav-item" id="nav-simulator" href="#simulator" onclick="switchNav('simulator', event)">
+        <span class="icon">🧪</span>
+        <span>Simulator Interaksi</span>
+      </a>
+      <a class="nav-item" id="nav-logs" href="#logs" onclick="switchNav('logs', event)">
+        <span class="icon">📋</span>
+        <span>Log Aktivitas</span>
+      </a>
+    </div>
+
+    <div class="nav-section" style="margin-top: auto; padding-bottom: 20px;">
+      <div class="nav-section-title">Tautan OBS</div>
+      <button class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 11.5px;" onclick="copyObsUrl()">
+        📋 Salin Link Overlay
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN CONTENT AREA
+       ============================================================ -->
+  <div class="main-wrapper">
     
-    <!-- Kolom Kiri -->
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-      
-      <!-- Kartu Koneksi TikTok Live -->
-      <div class="card">
-        <div class="card-title">
-          <span>Koneksi TikTok Live</span>
-          <span id="tiktok-status-badge" class="status-badge status-disconnected">
-            <span class="status-dot"></span> Terputus
-          </span>
-        </div>
-        <div class="tiktok-box">
-          <input type="text" id="tiktok-user-input" class="input-text" placeholder="Username TikTok (@username)" value="">
-          <button class="btn btn-primary" onclick="connectTikTok()">Hubungkan</button>
-        </div>
-
-        <!-- Banner Informasi Status Koneksi -->
-        <div id="tiktok-status-box" style="background: #0f172a; border: 1px solid #1e293b; padding: 12px 14px; border-radius: 12px; font-size: 12.5px; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-weight: 700; color: #38bdf8;" id="tiktok-status-title">Status: Belum Terhubung</span>
-          <span style="color: #cbd5e1; font-size: 12px;" id="tiktok-status-desc">Masukkan username TikTok Anda lalu klik Hubungkan. Tidak butuh login atau cookie apa pun!</span>
-        </div>
-
-        <!-- Panduan Chat Penonton -->
-        <div style="background: #0f172a; padding: 10px 14px; border-radius: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; border: 1px solid #1e293b;">
-          <span style="font-weight: 700; color: #38bdf8;">📋 Panduan Perintah Chat Penonton:</span>
-          <span style="color: #cbd5e1;">• <b>!play [judul lagu]</b> : Request lagu ke antrean</span>
-          <span style="color: #cbd5e1;">• <b>!revoke</b> : Batalkan lagu yang direquest di antrean</span>
-          <span style="color: #cbd5e1;">• <b>!skip</b> : Vote untuk lewati lagu (atau langsung jika diizinkan)</span>
-        </div>
-
-        <!-- Fitur Simulasi Chat (Test Tanpa Perlu Live) -->
-        <div style="background: #0f172a; padding: 12px 14px; border-radius: 12px; border: 1px solid #1e293b; display: flex; flex-direction: column; gap: 8px;">
-          <span style="font-weight: 700; color: #a78bfa; font-size: 12.5px;">🧪 Simulasi Chat Penonton (Uji Coba Langsung):</span>
-          <div style="display: flex; gap: 8px;">
-            <input type="text" id="sim-user" class="input-text" style="width: 100px; font-size: 12px; padding: 6px 10px;" value="penonton_1" placeholder="User">
-            <input type="text" id="sim-comment" class="input-text" style="font-size: 12px; padding: 6px 10px;" placeholder="Contoh: !play komang / !skip" onkeydown="if(event.key==='Enter')simulateChat()">
-            <button class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;" onclick="simulateChat()">Kirim</button>
-          </div>
-          <span style="font-size: 11px; color: #64748b;">Ketik <b>!play [lagu]</b>, <b>!revoke</b>, atau <b>!skip</b> untuk menguji sistem kapan saja tanpa perlu sedang live.</span>
-        </div>
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="tiktok-status-pill">
+        <div class="status-dot" id="top-dot"></div>
+        <span style="font-size: 13px; font-weight: 700;" id="top-username">@xolt.san</span>
+        <button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;" onclick="promptConnectTikTok()">Hubungkan</button>
       </div>
 
-      <!-- Kartu Now Playing & Kontrol Pemutar -->
-      <div class="card">
-        <div class="card-title">
-          <span>Sedang Dimainkan (Now Playing)</span>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-danger" style="font-size: 12px; padding: 4px 10px;" onclick="revokeLast()">↩️ Revoke Antrean</button>
-            <button class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;" onclick="skipTrack()">⏭️ Skip Lagu</button>
-          </div>
-        </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="/overlay" target="_blank" class="btn btn-outline" style="font-size: 12px;">📺 Buka Overlay ↗</a>
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0b0f19;">X</div>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ============================================================
+           TAB 1: PUSAT INTERAKSI (PERSIS INDOFINITY SCREENSHOT)
+           ============================================================ -->
+      <div class="tab-view active" id="view-pusat-interaksi">
         
-        <div class="player-row">
-          <img id="player-thumb" class="player-thumb" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150" alt="Cover">
-          <div class="player-meta">
-            <div id="player-title" class="player-title">Belum Ada Lagu Diputar</div>
-            <div id="player-artist" class="player-artist">Antrean kosong</div>
-            <div id="player-badge" class="player-badge"></div>
+        <div class="page-header">
+          <h1>Pusat Interaksi</h1>
+          <p>Pusat Interaksi memungkinkan Anda mengelola dan merespons aktivitas pengguna dengan mudah, mulai dari event seperti like dan gift hingga aksi kustom seperti memainkan suara, menampilkan alert, atau keystroke otomatis.</p>
+        </div>
+
+        <!-- Banner Peringatan Overlay OBS -->
+        <div class="notice-banner">
+          <div class="notice-left">
+            <div class="notice-icon">📺</div>
+            <div class="notice-text">
+              <h4>Overlay Aktif di OBS Studio / TikTok Live Studio</h4>
+              <p>Pasang URL Browser Source berikut di OBS: <code>http://localhost:3456/overlay</code></p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" onclick="copyObsUrl()">📋 Salin Link</button>
+            <a href="/overlay" target="_blank" class="btn btn-orange">Buka Link Overlay</a>
           </div>
         </div>
 
-        <!-- Form Tambah Lagu Manual -->
-        <div style="display: flex; gap: 10px; margin-top: 8px;">
-          <input type="text" id="manual-query" class="input-text" placeholder="Request lagu manual (Host / Streamer)..." onkeydown="if(event.key==='Enter')requestManual()">
-          <button class="btn btn-outline" onclick="requestManual()">+ Antrekan</button>
+        <!-- Bar Sakelar Master (Master Switches) -->
+        <div class="master-switches-bar">
+          
+          <div class="switch-pill">
+            <span>⚡ Semua Interaksi</span>
+            <label class="toggle">
+              <input type="checkbox" id="sw-all" checked onchange="toggleMasterSwitch('allInteractions', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-pill">
+            <span>⌨️ Keystroke</span>
+            <label class="toggle">
+              <input type="checkbox" id="sw-keystroke" checked onchange="toggleMasterSwitch('keystroke', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-pill">
+            <span>🕸️ Webhook</span>
+            <label class="toggle">
+              <input type="checkbox" id="sw-webhook" checked onchange="toggleMasterSwitch('webhook', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-pill">
+            <span>📹 OBS</span>
+            <label class="toggle">
+              <input type="checkbox" id="sw-obs" checked onchange="toggleMasterSwitch('obs', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-pill">
+            <span>⛏️ Minecraft Command</span>
+            <label class="toggle">
+              <input type="checkbox" id="sw-minecraft" checked onchange="toggleMasterSwitch('minecraft', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-pill">
+            <span>⚔️ Poin Win/Lose</span>
+            <label class="toggle">
+              <input type="checkbox" id="sw-winlose" checked onchange="toggleMasterSwitch('winLose', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-pill">
+            <span>🎡 Spin Roulette</span>
+            <label class="toggle">
+              <input type="checkbox" id="sw-spin" checked onchange="toggleMasterSwitch('spinRoulette', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+        </div>
+
+        <!-- Action Row -->
+        <div class="control-bar">
+          <div class="tabs-group">
+            <button class="tab-btn active" id="tab-filter-interaksi">Interaksi (<span id="count-interaksi">0</span>)</button>
+            <button class="tab-btn" id="tab-filter-aktivitas">Aktivitas (<span id="count-aktivitas">0</span>)</button>
+          </div>
+
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Cari Nama Interaksi..." oninput="filterInteractions()">
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" onclick="copyObsUrl()">📺 Link Overlay (0/10)</button>
+            <button class="btn btn-green" onclick="openCreateModal()">+ Interaksi</button>
+          </div>
+        </div>
+
+        <!-- Grid Kartu Interaksi -->
+        <div class="interactions-grid" id="interactions-container">
+          <!-- Di-render via JavaScript -->
+        </div>
+
+      </div>
+
+      <!-- ============================================================
+           TAB 2: MUSIC REQUEST & VINYL HUB (FITUR LIMUSIC KITA)
+           ============================================================ -->
+      <div class="tab-view" id="view-music-hub">
+        <div class="page-header">
+          <h1>Music Request & Vinyl Overlay Hub</h1>
+          <p>Kelola lagu yang di-request penonton lewat TikTok Live chat (!play, !skip, !revoke) dengan piringan hitam berputar.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          
+          <!-- Now Playing Card -->
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; font-size: 15px;">Sedang Dimainkan (Now Playing)</span>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="revokeTrack()">↩️ Revoke</button>
+                <button class="btn btn-outline" style="font-size: 11px; padding: 4px 8px;" onclick="skipTrack()">⏭️ Skip</button>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px; background: var(--card-inner); padding: 14px; border-radius: 12px;">
+              <img id="music-thumb" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=120" style="width: 64px; height: 64px; border-radius: 10px; object-fit: cover;">
+              <div style="min-width: 0; flex: 1;">
+                <div id="music-title" style="font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Belum Ada Lagu Diputar</div>
+                <div id="music-artist" style="font-size: 13px; color: var(--text-muted);">Antrean kosong</div>
+                <div id="music-badge" style="font-size: 11px; color: #38bdf8; font-weight: 700; margin-top: 2px;"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="manual-song" class="input-field" placeholder="Request lagu manual (Host)..." onkeydown="if(event.key==='Enter')manualRequestSong()">
+              <button class="btn btn-outline" onclick="manualRequestSong()">+ Antrekan</button>
+            </div>
+          </div>
+
+          <!-- Queue List -->
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; font-size: 15px;">Antrean Lagu (<span id="music-queue-count">0</span>)</span>
+              <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="clearSongQueue()">Hapus Semua</button>
+            </div>
+
+            <div id="music-queue-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto;">
+              <!-- Queue item render -->
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Preview Live Overlay -->
-      <div class="card">
-        <div class="card-title">
-          <span>Live Overlay Preview (Tampilan di OBS)</span>
-          <a href="/overlay" target="_blank" class="btn btn-outline" style="font-size: 12px; padding: 4px 10px;">Buka di Tab Baru ↗</a>
+      <!-- ============================================================
+           TAB 3: SIMULATOR INTERAKSI (TEST 1-KLIK)
+           ============================================================ -->
+      <div class="tab-view" id="view-simulator">
+        <div class="page-header">
+          <h1>Panel Simulator Interaksi</h1>
+          <p>Uji coba pengiriman gift, like, follow, share, atau chat tiruan secara instan untuk memastikan alert & suara di OBS muncul normal tanpa harus menunggu live asli.</p>
         </div>
-        <div class="preview-box">
-          <iframe id="overlay-preview-iframe" src="/overlay" allow="autoplay"></iframe>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-weight: 700; font-size: 15px; color: #f43f5e;">🎁 Simulasi Gift TikTok</span>
+            <p style="font-size: 12.5px; color: var(--text-muted);">Pilih jenis gift yang ingin disimulasikan:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Rose', diamonds: 1 })">🌹 Gift Rose (1 Koin)</button>
+              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'TikTok', diamonds: 1 })">🎵 Gift TikTok</button>
+              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Whale', diamonds: 100 })">🐳 Gift Paus (100 Koin)</button>
+              <button class="btn btn-outline" onclick="simEvent('gift', { giftName: 'Donut', diamonds: 30 })">🍩 Gift Donat</button>
+            </div>
+          </div>
+
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-weight: 700; font-size: 15px; color: #38bdf8;">❤️ Simulasi Like & Komunitas</span>
+            <p style="font-size: 12.5px; color: var(--text-muted);">Uji trigger Like kelipatan 50, Follow baru, atau Share:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button class="btn btn-outline" onclick="simEvent('like')">❤️ Tap-tap (+50 Like)</button>
+              <button class="btn btn-outline" onclick="simEvent('follow')">🌟 Penonton Follow</button>
+              <button class="btn btn-outline" onclick="simEvent('share')">📢 Penonton Share</button>
+            </div>
+          </div>
+
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-weight: 700; font-size: 15px; color: #10b981;">⌨️ & 🎡 Simulasi Aksi Khusus</span>
+            <p style="font-size: 12.5px; color: var(--text-muted);">Uji coba Keystroke lompat atau Roda Roulette:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button class="btn btn-outline" onclick="simEvent('chat', { comment: '!jump' })">⌨️ Chat !jump (Keystroke)</button>
+              <button class="btn btn-outline" onclick="simEvent('chat', { comment: '!spin' })">🎡 Chat !spin (Roulette Wheel)</button>
+              <button class="btn btn-outline" onclick="simEvent('chat', { comment: '!play lany xxl' })">🎵 Chat !play lany xxl</button>
+            </div>
+          </div>
+
         </div>
-        <div style="background: #0f172a; padding: 10px 14px; border-radius: 12px; font-size: 11.5px; border: 1px solid #1e293b; color: #94a3b8; display: flex; flex-direction: column; gap: 4px;">
-          <span style="font-weight: 700; color: #38bdf8;">🔊 Tips Suara & Audio Stream:</span>
-          <span>• <b>Di OBS Studio</b>: Tambah Browser Source → URL: <code>http://localhost:3456/overlay</code>. Centang <b>"Control audio via OBS"</b>. Pada Audio Mixer OBS → Klik kanan (atau ikon gerigi) → <i>Advanced Audio Properties</i> → Ubah Browser Source ke <b>Monitor and Output</b> agar suara masuk ke live stream dan terdengar di headset kamu!</span>
-          <span>• <b>Di Tab Browser</b>: Jika dibuka di Chrome/Brave, klik sekali pada halaman overlay untuk mengizinkan audio browser.</span>
+      </div>
+
+      <!-- ============================================================
+           TAB 4: LOG AKTIVITAS
+           ============================================================ -->
+      <div class="tab-view" id="view-logs">
+        <div class="page-header">
+          <h1>Log Aktivitas & Chat TikTok Live</h1>
+          <p>Catatan riwayat pesan chat penonton dan event interaksi yang masuk secara realtime.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-weight: 700; font-size: 15px;">⚡ Riwayat Alert Interaksi</span>
+            <div id="logs-alerts-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
+              <!-- Render alert logs -->
+            </div>
+          </div>
+
+          <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-weight: 700; font-size: 15px;">💬 Log Chat Live Streamer</span>
+            <div id="logs-chat-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
+              <!-- Render chat logs -->
+            </div>
+          </div>
+
         </div>
       </div>
 
     </div>
-
-    <!-- Kolom Kanan -->
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-      
-      <!-- Kartu Antrean Lagu (Queue) -->
-      <div class="card">
-        <div class="card-title">
-          <span>Antrean Lagu (<span id="queue-count">0</span>)</span>
-          <button class="btn btn-danger" style="font-size: 11.5px; padding: 4px 8px;" onclick="clearQueue()">Hapus Semua</button>
-        </div>
-
-        <div class="queue-list" id="queue-list">
-          <p style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 24px;">Antrean masih kosong. Komen !play [lagu] di live stream!</p>
-        </div>
-      </div>
-
-      <!-- Live Chat Request Log -->
-      <div class="card">
-        <div class="card-title">
-          <span>Log Chat TikTok Live</span>
-          <span style="font-size: 12px; color: var(--text-muted);">Realtime</span>
-        </div>
-        <div class="chat-log" id="chat-log">
-          <div class="chat-row">
-            <span class="chat-user">Sistem:</span>
-            <span class="chat-msg">Menunggu komentar penonton live...</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
   </div>
 
-</div>
+  <!-- ============================================================
+       MODAL: TAMBAH / EDIT INTERAKSI BARU
+       ============================================================ -->
+  <div class="modal-backdrop" id="interaction-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="modal-title">Tambah Interaksi Baru</h3>
+        <button class="btn btn-outline" style="padding: 4px 8px;" onclick="closeModal()">✕</button>
+      </div>
 
-<script>
-  function copyObsUrl() {
-    const url = window.location.origin + '/overlay';
-    navigator.clipboard.writeText(url).then(() => {
-      alert('Tautan Overlay berhasil disalin!\n' + url + '\n\nTempelkan link ini di Browser Source OBS Studio atau TikTok Live Studio.');
-    });
-  }
+      <input type="hidden" id="modal-inter-id" value="">
 
-  async function connectTikTok() {
-    const username = document.getElementById('tiktok-user-input').value.trim();
-    if (!username) return alert('Silakan masukkan username TikTok kamu!');
-    
-    try {
-      const res = await fetch('/api/tiktok/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username })
+      <div class="form-group">
+        <label>Nama Interaksi</label>
+        <input type="text" id="form-name" class="input-field" placeholder="Contoh: Gift Rose -> Alert & SFX">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>Kategori Aksi</label>
+          <select id="form-category" class="input-field" onchange="onCategoryChange()">
+            <option value="alert">📺 Alert Visual & Suara</option>
+            <option value="keystroke">⌨️ Keystroke (Game Automation)</option>
+            <option value="spin">🎡 Spin Roulette (Roda)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Pemicu (Trigger)</label>
+          <select id="form-trigger-type" class="input-field" onchange="onTriggerTypeChange()">
+            <option value="gift">🎁 Gift TikTok</option>
+            <option value="like">❤️ Like / Tap Layar</option>
+            <option value="follow">🌟 Follow Streamer</option>
+            <option value="share">📢 Share Live Stream</option>
+            <option value="chat">💬 Komentar Chat</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="group-trigger-gift" class="form-group">
+        <label>Nama Gift TikTok</label>
+        <input type="text" id="form-gift-name" class="input-field" placeholder="Rose, TikTok, Whale, Donut (atau kosongkan untuk semua gift)">
+      </div>
+
+      <div id="group-trigger-like" class="form-group" style="display: none;">
+        <label>Jumlah Kelipatan Like</label>
+        <input type="number" id="form-like-count" class="input-field" value="50" min="1">
+      </div>
+
+      <div id="group-trigger-chat" class="form-group" style="display: none;">
+        <label>Kata Kunci Chat</label>
+        <input type="text" id="form-chat-keyword" class="input-field" placeholder="Contoh: !jump / !spin / halo">
+      </div>
+
+      <div class="form-group">
+        <label>Judul Alert</label>
+        <input type="text" id="form-action-title" class="input-field" value="{user} Mengirim {gift}! 🌹">
+      </div>
+
+      <div class="form-group">
+        <label>Pesan Alert</label>
+        <input type="text" id="form-action-msg" class="input-field" value="Terima kasih banyak atas dukungannya!">
+      </div>
+
+      <div id="group-action-alert" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-group">
+          <label>URL Gambar / GIF Alert</label>
+          <input type="text" id="form-media-url" class="input-field" value="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Efek Suara (SFX)</label>
+            <select id="form-sfx" class="input-field">
+              <option value="bell">🔔 Bell / Chime</option>
+              <option value="fanfare">🎺 Fanfare Kemenangan</option>
+              <option value="pop">🫧 Pop Effect</option>
+              <option value="ting">✨ Ting Ting</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Durasi Tampil (Detik)</label>
+            <input type="number" id="form-duration" class="input-field" value="5" min="2" max="15">
+          </div>
+        </div>
+
+        <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 4px;">
+          <input type="checkbox" id="form-tts" checked style="width: 18px; height: 18px;">
+          <label for="form-tts" style="margin-bottom: 0; cursor: pointer;">Bacakan Suara TTS Otomatis (Bahasa Indonesia)</label>
+        </div>
+      </div>
+
+      <div id="group-action-keystroke" class="form-group" style="display: none;">
+        <label>Tombol Keyboard yang Ditekan Otomatis (Windows)</label>
+        <select id="form-keystroke-key" class="input-field">
+          <option value="SPACE">SPACE (Lompat / Jump)</option>
+          <option value="W">W (Maju)</option>
+          <option value="S">S (Mundur)</option>
+          <option value="A">A (Kiri)</option>
+          <option value="D">D (Kanan)</option>
+          <option value="F">F (Interact / Ambil)</option>
+          <option value="E">E (Inventory / Buka)</option>
+          <option value="1">Angka 1</option>
+          <option value="2">Angka 2</option>
+          <option value="ENTER">ENTER</option>
+          <option value="ESC">ESC</option>
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+        <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+        <button class="btn btn-green" onclick="saveInteractionForm()">Simpan Interaksi</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let interactionsList = [];
+    let currentMasterSwitches = {};
+
+    function copyObsUrl() {
+      const url = window.location.origin + '/overlay';
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Tautan Overlay OBS berhasil disalin!\n' + url + '\n\nTempelkan link ini di Browser Source OBS Studio atau TikTok Live Studio.');
       });
-      const data = await res.json();
-      if (data.success) {
-        const statusBadge = document.getElementById('tiktok-status-badge');
-        statusBadge.innerHTML = '<span class="status-dot"></span> Memeriksa siaran...';
-      } else {
-        alert('Gagal: ' + (data.error || 'Terjadi kesalahan'));
-      }
-    } catch (e) {
-      alert('Error: ' + e.message);
     }
-  }
 
-  async function simulateChat() {
-    const userInput = document.getElementById('sim-user');
-    const commentInput = document.getElementById('sim-comment');
-    const user = userInput.value.trim() || 'penonton_1';
-    const comment = commentInput.value.trim();
-    if (!comment) return;
-    commentInput.value = '';
+    function switchNav(viewId, event) {
+      if (event) event.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
 
-    await fetch('/api/chat/simulate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user, comment })
-    });
-  }
+      const targetNav = document.getElementById('nav-' + viewId);
+      if (targetNav) targetNav.classList.add('active');
 
-  async function skipTrack() {
-    await fetch('/api/skip', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'Host', isModerator: true })
-    });
-  }
-
-  async function revokeLast() {
-    await fetch('/api/revoke', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'Host' })
-    });
-  }
-
-  async function clearQueue() {
-    if (!confirm('Kosongkan semua antrean lagu?')) return;
-    await fetch('/api/clear', { method: 'POST' });
-  }
-
-  async function deleteQueueItem(index) {
-    await fetch('/api/queue/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ index })
-    });
-  }
-
-  async function requestManual() {
-    const input = document.getElementById('manual-query');
-    const query = input.value.trim();
-    if (!query) return;
-    input.value = '';
-
-    try {
-      const res = await fetch('/api/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, user: 'Streamer (Host)' })
-      });
-      const data = await res.json();
-      if (!data.success) {
-        alert('Gagal mencari lagu: ' + (data.error || 'Tidak ditemukan'));
-      }
-    } catch (e) {
-      alert('Error: ' + e.message);
+      const targetView = document.getElementById('view-' + viewId);
+      if (targetView) targetView.classList.add('active');
     }
-  }
 
-  // Refresh status setiap 1 detik
-  async function refreshDashboard() {
-    try {
-      const res = await fetch('/api/status');
-      if (!res.ok) return;
-      const data = await res.json();
+    async function promptConnectTikTok() {
+      const username = prompt('Masukkan username akun TikTok Live Anda:', 'xolt.san');
+      if (!username) return;
+      try {
+        const res = await fetch('/api/tiktok/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username.trim() })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Berhasil! Bot sedang memantau siaran @' + username);
+          loadInteractions();
+        }
+      } catch(e) {
+        alert('Error: ' + e.message);
+      }
+    }
 
-      // Update status TikTok
-      const statusBadge = document.getElementById('tiktok-status-badge');
-      const statusTitle = document.getElementById('tiktok-status-title');
-      const statusDesc = document.getElementById('tiktok-status-desc');
+    async function toggleMasterSwitch(key, value) {
+      try {
+        await fetch('/api/interactions/master-switch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, value })
+        });
+      } catch(e) {}
+    }
 
-      if (data.tiktokConnected) {
-        statusBadge.className = 'status-badge status-connected';
-        statusBadge.innerHTML = '<span class="status-dot"></span> Terhubung (@' + data.tiktokUsername + ')';
-        if (statusTitle) {
-          statusTitle.innerText = 'Status: 🟢 Terhubung ke Live Chat';
-          statusTitle.style.color = '#10b981';
-        }
-        if (statusDesc) statusDesc.innerText = 'Bot sedang mendengarkan chat dari live @' + data.tiktokUsername + '. Penonton bisa langsung ketik !play [lagu]!';
-      } else if (data.lastTikTokStatus === 'waiting') {
-        statusBadge.className = 'status-badge';
-        statusBadge.style.background = 'rgba(234, 179, 8, 0.15)';
-        statusBadge.style.color = '#eab308';
-        statusBadge.innerHTML = '<span class="status-dot"></span> Menunggu Live...';
-        if (statusTitle) {
-          statusTitle.innerText = 'Status: 🟡 Menunggu Siaran Dimulai';
-          statusTitle.style.color = '#eab308';
-        }
-        if (statusDesc) statusDesc.innerText = data.lastTikTokMessage || 'Akun @' + data.tiktokUsername + ' sedang offline. Silakan mulai LIVE di TikTok, sistem akan otomatis terhubung!';
-      } else if (data.lastTikTokStatus === 'checking' || data.lastTikTokStatus === 'connecting') {
-        statusBadge.className = 'status-badge';
-        statusBadge.style.background = 'rgba(56, 189, 248, 0.15)';
-        statusBadge.style.color = '#38bdf8';
-        statusBadge.innerHTML = '<span class="status-dot"></span> Menghubungkan...';
-        if (statusTitle) {
-          statusTitle.innerText = 'Status: 🔵 Menghubungkan';
-          statusTitle.style.color = '#38bdf8';
-        }
-        if (statusDesc) statusDesc.innerText = data.lastTikTokMessage || 'Sedang memeriksa status siaran...';
-      } else {
-        statusBadge.className = 'status-badge status-disconnected';
-        statusBadge.style.background = 'rgba(239, 68, 68, 0.15)';
-        statusBadge.style.color = '#ef4444';
-        statusBadge.innerHTML = '<span class="status-dot"></span> Terputus';
-        if (statusTitle) {
-          statusTitle.innerText = 'Status: Belum Terhubung';
-          statusTitle.style.color = '#38bdf8';
-        }
-        if (statusDesc) statusDesc.innerText = data.lastTikTokMessage || 'Masukkan username TikTok Anda lalu klik Hubungkan.';
+    async function toggleInteraction(id) {
+      try {
+        await fetch('/api/interactions/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        loadInteractions();
+      } catch(e) {}
+    }
+
+    async function testInteraction(id) {
+      try {
+        await fetch('/api/interactions/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        alert('⚡ Simulasi interaksi telah dikirim ke Overlay OBS!');
+      } catch(e) {
+        alert('Gagal: ' + e.message);
+      }
+    }
+
+    async function deleteInteraction(id) {
+      if (!confirm('Hapus interaksi ini?')) return;
+      try {
+        await fetch('/api/interactions/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        loadInteractions();
+      } catch(e) {}
+    }
+
+    async function simEvent(type, extra = {}) {
+      try {
+        await fetch('/api/simulator/event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, user: 'Penonton_TikTok', ...extra })
+        });
+        alert(`Simulasi event [${type}] berhasil dipicu!`);
+      } catch(e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    function renderInteractions(items) {
+      const container = document.getElementById('interactions-container');
+      document.getElementById('count-interaksi').innerText = items.length;
+      document.getElementById('count-aktivitas').innerText = items.length;
+
+      if (items.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Belum ada interaksi. Klik [+ Interaksi] untuk membuat baru!</div>';
+        return;
       }
 
-      // Update username input jika kosong
-      const userInput = document.getElementById('tiktok-user-input');
-      if (!userInput.value && data.tiktokUsername) {
-        userInput.value = data.tiktokUsername;
-      }
+      container.innerHTML = items.map(item => {
+        const cat = item.category || 'alert';
+        let icon = '📺';
+        if (cat === 'keystroke') icon = '⌨️';
+        if (cat === 'spin') icon = '🎡';
 
-      // Update Now Playing
-      if (data.nowPlaying) {
-        document.getElementById('player-title').innerText = data.nowPlaying.title;
-        document.getElementById('player-artist').innerText = data.nowPlaying.artist;
-        if (data.nowPlaying.thumbnail) document.getElementById('player-thumb').src = data.nowPlaying.thumbnail;
-        document.getElementById('player-badge').innerText = data.nowPlaying.requestedBy ? 'Requested by: @' + data.nowPlaying.requestedBy : '';
-      } else {
-        document.getElementById('player-title').innerText = 'Tidak ada lagu';
-        document.getElementById('player-artist').innerText = 'Antrean kosong';
-        document.getElementById('player-badge').innerText = '';
-      }
+        let triggerDesc = 'Pemicu: ' + (item.trigger?.type || 'gift').toUpperCase();
+        if (item.trigger?.type === 'gift') {
+          triggerDesc = `🎁 Gift: ${item.trigger.giftName || 'Semua Gift'}`;
+        } else if (item.trigger?.type === 'like') {
+          triggerDesc = `❤️ Like: ${item.trigger.likeCount || 50}x`;
+        } else if (item.trigger?.type === 'chat') {
+          triggerDesc = `💬 Chat: ${item.trigger.chatKeyword || ''}`;
+        }
 
-      // Update Queue List
-      document.getElementById('queue-count').innerText = data.queue.length;
-      const queueList = document.getElementById('queue-list');
-      if (data.queue.length === 0) {
-        queueList.innerHTML = '<p style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 24px;">Antrean masih kosong. Komen !play [lagu] di live stream!</p>';
-      } else {
-        queueList.innerHTML = data.queue.map((item, idx) => `
-          <div class="queue-item">
-            <img class="queue-thumb" src="${item.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100'}" alt="Thumb">
-            <div class="queue-info">
-              <div class="queue-title">${idx + 1}. ${item.title}</div>
-              <div class="queue-sub">${item.artist} ${item.requestedBy ? '• @' + item.requestedBy : ''}</div>
+        let actionDesc = 'Aksi: Alert Visual & SFX';
+        if (cat === 'keystroke') actionDesc = `⌨️ Tekan [${item.action?.key || 'SPACE'}]`;
+        if (cat === 'spin') actionDesc = `🎡 Spin Roda Roulette`;
+
+        return `
+          <div class="interaction-card">
+            <div class="card-head">
+              <div class="card-info">
+                <div class="card-icon">${icon}</div>
+                <div>
+                  <div class="card-title-text">${item.name}</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">${cat.toUpperCase()}</div>
+                </div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" ${item.enabled ? 'checked' : ''} onchange="toggleInteraction('${item.id}')">
+                <span class="slider"></span>
+              </label>
             </div>
-            <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="deleteQueueItem(${idx})">✕</button>
-          </div>
-        `).join('');
-      }
 
-      // Update Chat Log
-      if (data.chatLogs && data.chatLogs.length > 0) {
-        const chatBox = document.getElementById('chat-log');
-        chatBox.innerHTML = data.chatLogs.map(log => `
-          <div class="chat-row">
-            <span class="chat-user">@${log.user}:</span>
-            <span class="chat-msg">${log.message}</span>
-          </div>
-        `).join('');
-      }
+            <div class="badges-row">
+              <span class="badge-tag badge-trigger">${triggerDesc}</span>
+              <span class="badge-tag badge-action">${actionDesc}</span>
+            </div>
 
-    } catch (e) {
-      // console.error(e);
+            <div class="card-actions">
+              <button class="btn btn-outline" style="font-size: 11px; padding: 4px 10px;" onclick="testInteraction('${item.id}')">🧪 Test</button>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline" style="font-size: 11px; padding: 4px 8px;" onclick="openEditModal('${item.id}')">✏️</button>
+                <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="deleteInteraction('${item.id}')">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
-  }
 
-  setInterval(refreshDashboard, 1000);
-  refreshDashboard();
-</script>
+    function filterInteractions() {
+      const q = document.getElementById('search-input').value.toLowerCase().trim();
+      if (!q) {
+        renderInteractions(interactionsList);
+      } else {
+        const filtered = interactionsList.filter(i => 
+          i.name.toLowerCase().includes(q) || 
+          (i.trigger?.giftName && i.trigger.giftName.toLowerCase().includes(q)) ||
+          (i.trigger?.chatKeyword && i.trigger.chatKeyword.toLowerCase().includes(q))
+        );
+        renderInteractions(filtered);
+      }
+    }
 
+    async function loadInteractions() {
+      try {
+        const res = await fetch('/api/interactions');
+        if (!res.ok) return;
+        const data = await res.json();
+        interactionsList = data.interactions || [];
+        currentMasterSwitches = data.masterSwitches || {};
+
+        // Update Switch Checkboxes
+        if (currentMasterSwitches.allInteractions !== undefined) document.getElementById('sw-all').checked = currentMasterSwitches.allInteractions;
+        if (currentMasterSwitches.keystroke !== undefined) document.getElementById('sw-keystroke').checked = currentMasterSwitches.keystroke;
+        if (currentMasterSwitches.webhook !== undefined) document.getElementById('sw-webhook').checked = currentMasterSwitches.webhook;
+        if (currentMasterSwitches.obs !== undefined) document.getElementById('sw-obs').checked = currentMasterSwitches.obs;
+        if (currentMasterSwitches.minecraft !== undefined) document.getElementById('sw-minecraft').checked = currentMasterSwitches.minecraft;
+        if (currentMasterSwitches.winLose !== undefined) document.getElementById('sw-winlose').checked = currentMasterSwitches.winLose;
+        if (currentMasterSwitches.spinRoulette !== undefined) document.getElementById('sw-spin').checked = currentMasterSwitches.spinRoulette;
+
+        filterInteractions();
+
+        // Render Recent Alerts in Logs Tab
+        if (data.recentAlertLogs) {
+          const alertLogsEl = document.getElementById('logs-alerts-container');
+          if (alertLogsEl) {
+            alertLogsEl.innerHTML = data.recentAlertLogs.map(l => `
+              <div style="background: var(--card-inner); padding: 8px 12px; border-radius: 8px; font-size: 12px; display: flex; justify-content: space-between;">
+                <span><b>@${l.user}</b>: ${l.details}</span>
+                <span style="color: #64748b;">${new Date(l.time).toLocaleTimeString()}</span>
+              </div>
+            `).join('') || '<div style="color: #64748b; font-size: 12px;">Belum ada riwayat alert.</div>';
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Modal Helpers
+    function openCreateModal() {
+      document.getElementById('modal-title').innerText = 'Tambah Interaksi Baru';
+      document.getElementById('modal-inter-id').value = '';
+      document.getElementById('form-name').value = '';
+      document.getElementById('form-category').value = 'alert';
+      document.getElementById('form-trigger-type').value = 'gift';
+      document.getElementById('form-gift-name').value = 'Rose';
+      document.getElementById('form-action-title').value = '{user} Mengirim {gift}! 🌹';
+      document.getElementById('form-action-msg').value = 'Terima kasih banyak atas dukungannya!';
+      document.getElementById('form-media-url').value = 'https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif';
+      document.getElementById('form-sfx').value = 'bell';
+      document.getElementById('form-duration').value = '5';
+      document.getElementById('form-tts').checked = true;
+      onCategoryChange();
+      onTriggerTypeChange();
+      document.getElementById('interaction-modal').classList.add('show');
+    }
+
+    function openEditModal(id) {
+      const item = interactionsList.find(i => i.id === id);
+      if (!item) return;
+      document.getElementById('modal-title').innerText = 'Edit Interaksi';
+      document.getElementById('modal-inter-id').value = item.id;
+      document.getElementById('form-name').value = item.name || '';
+      document.getElementById('form-category').value = item.category || 'alert';
+      document.getElementById('form-trigger-type').value = item.trigger?.type || 'gift';
+      document.getElementById('form-gift-name').value = item.trigger?.giftName || '';
+      document.getElementById('form-like-count').value = item.trigger?.likeCount || 50;
+      document.getElementById('form-chat-keyword').value = item.trigger?.chatKeyword || '';
+      document.getElementById('form-action-title').value = item.action?.title || '';
+      document.getElementById('form-action-msg').value = item.action?.message || '';
+      document.getElementById('form-media-url').value = item.action?.media || '';
+      document.getElementById('form-sfx').value = item.action?.sfx || 'bell';
+      document.getElementById('form-duration').value = item.action?.duration || 5;
+      document.getElementById('form-tts').checked = !!item.action?.tts;
+      if (item.action?.key) document.getElementById('form-keystroke-key').value = item.action.key;
+      onCategoryChange();
+      onTriggerTypeChange();
+      document.getElementById('interaction-modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('interaction-modal').classList.remove('show');
+    }
+
+    function onCategoryChange() {
+      const cat = document.getElementById('form-category').value;
+      const groupAlert = document.getElementById('group-action-alert');
+      const groupKey = document.getElementById('group-action-keystroke');
+      if (cat === 'keystroke') {
+        groupAlert.style.display = 'none';
+        groupKey.style.display = 'flex';
+      } else {
+        groupAlert.style.display = 'flex';
+        groupKey.style.display = 'none';
+      }
+    }
+
+    function onTriggerTypeChange() {
+      const t = document.getElementById('form-trigger-type').value;
+      document.getElementById('group-trigger-gift').style.display = (t === 'gift') ? 'flex' : 'none';
+      document.getElementById('group-trigger-like').style.display = (t === 'like') ? 'flex' : 'none';
+      document.getElementById('group-trigger-chat').style.display = (t === 'chat') ? 'flex' : 'none';
+    }
+
+    async function saveInteractionForm() {
+      const id = document.getElementById('modal-inter-id').value;
+      const name = document.getElementById('form-name').value.trim();
+      if (!name) return alert('Nama interaksi wajib diisi!');
+
+      const category = document.getElementById('form-category').value;
+      const triggerType = document.getElementById('form-trigger-type').value;
+
+      const trigger = { type: triggerType };
+      if (triggerType === 'gift') trigger.giftName = document.getElementById('form-gift-name').value.trim() || 'Rose';
+      if (triggerType === 'like') trigger.likeCount = parseInt(document.getElementById('form-like-count').value, 10) || 50;
+      if (triggerType === 'chat') trigger.chatKeyword = document.getElementById('form-chat-keyword').value.trim() || '!jump';
+
+      const action = {
+        type: category,
+        title: document.getElementById('form-action-title').value.trim(),
+        message: document.getElementById('form-action-msg').value.trim(),
+        media: document.getElementById('form-media-url').value.trim(),
+        sfx: document.getElementById('form-sfx').value,
+        duration: parseInt(document.getElementById('form-duration').value, 10) || 5,
+        tts: document.getElementById('form-tts').checked,
+        key: document.getElementById('form-keystroke-key').value
+      };
+
+      const interactionObj = {
+        id: id || undefined,
+        name,
+        category,
+        trigger,
+        action,
+        enabled: true
+      };
+
+      try {
+        await fetch('/api/interactions/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ interaction: interactionObj })
+        });
+        closeModal();
+        loadInteractions();
+      } catch(e) {
+        alert('Gagal menyimpan: ' + e.message);
+      }
+    }
+
+    // Music Player Helpers
+    async function skipTrack() {
+      await fetch('/api/skip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'Host', isModerator: true }) });
+    }
+
+    async function revokeTrack() {
+      await fetch('/api/revoke', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: 'Host' }) });
+    }
+
+    async function clearSongQueue() {
+      if (!confirm('Kosongkan antrean lagu?')) return;
+      await fetch('/api/clear', { method: 'POST' });
+    }
+
+    async function manualRequestSong() {
+      const input = document.getElementById('manual-song');
+      const query = input.value.trim();
+      if (!query) return;
+      input.value = '';
+      await fetch('/api/request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, user: 'Streamer (Host)' }) });
+    }
+
+    // Sync status TikTok & Music Loop
+    async function syncAppStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Topbar Status
+        const dot = document.getElementById('top-dot');
+        const userLabel = document.getElementById('top-username');
+        if (data.tiktokConnected) {
+          dot.className = 'status-dot connected';
+          userLabel.innerText = '@' + data.tiktokUsername + ' (LIVE 🟢)';
+        } else {
+          dot.className = 'status-dot';
+          userLabel.innerText = '@' + (data.tiktokUsername || 'xolt.san') + ' (Offline)';
+        }
+
+        // Music Now Playing
+        if (data.nowPlaying) {
+          document.getElementById('music-title').innerText = data.nowPlaying.title;
+          document.getElementById('music-artist').innerText = data.nowPlaying.artist;
+          if (data.nowPlaying.thumbnail) document.getElementById('music-thumb').src = data.nowPlaying.thumbnail;
+          document.getElementById('music-badge').innerText = data.nowPlaying.requestedBy ? 'Requested by: @' + data.nowPlaying.requestedBy : '';
+        } else {
+          document.getElementById('music-title').innerText = 'Tidak ada lagu dimainkan';
+          document.getElementById('music-artist').innerText = 'Antrean kosong';
+          document.getElementById('music-badge').innerText = '';
+        }
+
+        // Music Queue
+        document.getElementById('music-queue-count').innerText = data.queue.length;
+        const qList = document.getElementById('music-queue-list');
+        if (data.queue.length === 0) {
+          qList.innerHTML = '<div style="color:#64748b; font-size:12.5px; text-align:center; padding: 20px;">Antrean masih kosong. Komen !play [lagu] di live!</div>';
+        } else {
+          qList.innerHTML = data.queue.map((item, idx) => `
+            <div style="background: var(--card-inner); padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <span style="font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${idx + 1}. ${item.title}</span>
+              <span style="font-size: 11px; color: #38bdf8;">@${item.requestedBy || 'Viewer'}</span>
+            </div>
+          `).join('');
+        }
+
+        // Chat Log
+        if (data.chatLogs) {
+          const chatLogEl = document.getElementById('logs-chat-container');
+          if (chatLogEl) {
+            chatLogEl.innerHTML = data.chatLogs.map(c => `
+              <div style="background: var(--card-inner); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+                <span style="color: #38bdf8; font-weight: 700;">@${c.user}:</span> <span>${c.message}</span>
+              </div>
+            `).join('');
+          }
+        }
+
+      } catch(e) {}
+    }
+
+    loadInteractions();
+    setInterval(loadInteractions, 3000);
+    setInterval(syncAppStatus, 1000);
+    syncAppStatus();
+  </script>
 </body>
 </html>
-

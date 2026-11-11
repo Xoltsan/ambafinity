@@ -21,6 +21,15 @@
   "cooldownSeconds": 60,
   "maxQueueLength": 25,
   "port": 3456,
+  "masterSwitches": {
+    "allInteractions": true,
+    "keystroke": true,
+    "webhook": true,
+    "obs": true,
+    "minecraft": true,
+    "winLose": true,
+    "spinRoulette": true
+  },
   "sessionId": "",
   "maxSongDurationMinutes": 8,
   "theme": "glass-blue",

@@ -2,12 +2,15 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 import { TikTokLiveConnection, WebcastEvent } from 'tiktok-live-connector';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Muat Konfigurasi
+// ============================================================================
+// 1. KONFIGURASI SISTEM & MASTER SWITCHES
+// ============================================================================
 const configPath = path.join(__dirname, 'config.json');
 let config = {
   tiktokUsername: 'xolt.san',
@@ -21,13 +24,33 @@ let config = {
   skipVotesNeeded: 2,
   cooldownSeconds: 60,
   maxQueueLength: 25,
-  port: 3456
+  port: 3456,
+  masterSwitches: {
+    allInteractions: true,
+    keystroke: true,
+    webhook: true,
+    obs: true,
+    minecraft: true,
+    winLose: true,
+    spinRoulette: true
+  }
 };
 
 if (fs.existsSync(configPath)) {
   try {
     const raw = fs.readFileSync(configPath, 'utf8');
     config = { ...config, ...JSON.parse(raw) };
+    if (!config.masterSwitches) {
+      config.masterSwitches = {
+        allInteractions: true,
+        keystroke: true,
+        webhook: true,
+        obs: true,
+        minecraft: true,
+        winLose: true,
+        spinRoulette: true
+      };
+    }
   } catch (e) {
     console.error('[Config] Gagal membaca config.json:', e);
   }
@@ -41,7 +64,142 @@ function saveConfig() {
   }
 }
 
-// State Pemutar Musik & Antrean
+// ============================================================================
+// 2. PUSAT INTERAKSI (INTERACTION CENTER ENGINE)
+// ============================================================================
+const interactionsPath = path.join(__dirname, 'interactions.json');
+let interactions = [];
+
+function loadInteractions() {
+  if (fs.existsSync(interactionsPath)) {
+    try {
+      const raw = fs.readFileSync(interactionsPath, 'utf8');
+      interactions = JSON.parse(raw);
+    } catch (e) {
+      console.error('[Interactions] Gagal membaca interactions.json:', e);
+      interactions = [];
+    }
+  }
+}
+
+function saveInteractions() {
+  try {
+    fs.writeFileSync(interactionsPath, JSON.stringify(interactions, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[Interactions] Gagal menyimpan interactions.json:', e);
+  }
+}
+
+loadInteractions();
+
+let pendingAlerts = [];
+let recentAlertLogs = [];
+let accumulatedLikes = 0;
+
+function sendKeystroke(key) {
+  if (!config.masterSwitches?.allInteractions || !config.masterSwitches?.keystroke) return;
+  const keyMap = {
+    'SPACE': '{SPACE}',
+    'ENTER': '{ENTER}',
+    'ESC': '{ESC}',
+    'TAB': '{TAB}',
+    'BACKSPACE': '{BACKSPACE}',
+    'UP': '{UP}',
+    'DOWN': '{DOWN}',
+    'LEFT': '{LEFT}',
+    'RIGHT': '{RIGHT}',
+    'W': 'w',
+    'A': 'a',
+    'S': 's',
+    'D': 'd',
+    'E': 'e',
+    'F': 'f',
+    'Q': 'q',
+    'R': 'r',
+    '1': '1',
+    '2': '2',
+    '3': '3'
+  };
+  const targetKey = keyMap[String(key).toUpperCase()] || key;
+  const cmd = `powershell -NoProfile -Command "$w = New-Object -ComObject Wscript.Shell; $w.SendKeys('${targetKey}')"`;
+  exec(cmd, (err) => {
+    if (err) console.error('[Keystroke] Error sending keystroke:', err.message);
+    else console.log(`[Keystroke] ⌨️ Tombol [${key}] berhasil ditekan di sistem!`);
+  });
+}
+
+function triggerInteraction(interaction, eventData = {}) {
+  if (!config.masterSwitches?.allInteractions || !interaction.enabled) return null;
+
+  if (interaction.category === 'keystroke' && !config.masterSwitches?.keystroke) return null;
+  if (interaction.category === 'spin' && !config.masterSwitches?.spinRoulette) return null;
+  if (interaction.category === 'webhook' && !config.masterSwitches?.webhook) return null;
+  if (interaction.category === 'minecraft' && !config.masterSwitches?.minecraft) return null;
+
+  const user = eventData.user || 'Penonton';
+  const avatar = eventData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100';
+  const action = interaction.action || {};
+
+  const title = (action.title || '{user} memicu interaksi!')
+    .replace(/{user}/g, user)
+    .replace(/{gift}/g, eventData.giftName || 'Gift')
+    .replace(/{count}/g, eventData.count || 1);
+
+  const message = (action.message || '')
+    .replace(/{user}/g, user)
+    .replace(/{gift}/g, eventData.giftName || 'Gift')
+    .replace(/{count}/g, eventData.count || 1);
+
+  const ttsText = (action.ttsText || title)
+    .replace(/{user}/g, user)
+    .replace(/{gift}/g, eventData.giftName || 'Gift')
+    .replace(/{count}/g, eventData.count || 1);
+
+  console.log(`[Pusat Interaksi] ⚡ "${interaction.name}" dipicu oleh @${user}`);
+
+  // Eksekusi Keystroke jika ada
+  if (action.type === 'keystroke' && action.key) {
+    sendKeystroke(action.key);
+  }
+
+  const alertItem = {
+    id: 'alert-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    timestamp: Date.now(),
+    interactionId: interaction.id,
+    name: interaction.name,
+    category: interaction.category,
+    type: action.type || 'alert',
+    user,
+    avatar,
+    title,
+    message,
+    media: action.media || '',
+    sfx: action.sfx || 'bell',
+    tts: !!action.tts,
+    ttsText: ttsText,
+    duration: action.duration || 5,
+    options: action.options || []
+  };
+
+  pendingAlerts.push(alertItem);
+  recentAlertLogs.unshift({
+    id: alertItem.id,
+    time: Date.now(),
+    interactionName: interaction.name,
+    user,
+    details: title
+  });
+  if (recentAlertLogs.length > 50) recentAlertLogs.pop();
+
+  latestToast = Date.now();
+  latestToastMessage = title;
+
+  return alertItem;
+}
+
+// ============================================================================
+// 3. STATE PEMUTAR MUSIK & ANTREAN
+// ============================================================================
 let nowPlaying = null;
 let queue = [];
 let userCooldowns = new Map();
@@ -89,7 +247,7 @@ if (config.tiktokUsername) {
 }
 
 // ============================================================================
-// 1. PENCARIAN YOUTUBE MUSIC CEPAT (NATIVE TANPA API KEY)
+// 4. PENCARIAN YOUTUBE MUSIC CEPAT (NATIVE TANPA API KEY)
 // ============================================================================
 async function searchYouTube(query) {
   try {
@@ -132,7 +290,7 @@ async function searchYouTube(query) {
 }
 
 // ============================================================================
-// 2. LOGIKA ANTREAN LAGU, SKIP & REVOKE
+// 5. LOGIKA ANTREAN LAGU, SKIP & REVOKE
 // ============================================================================
 async function handleSongRequest(query, requestedBy = 'Host') {
   if (!query || query.trim().length === 0) {
@@ -293,7 +451,16 @@ async function processIncomingChatMessage(user, comment, isModerator = false) {
     return handleSkip(user, isModerator);
   }
 
-  // 3. Cek !play
+  // 3. Cek Interaksi Chat (Pusat Interaksi)
+  for (const inter of interactions) {
+    if (!inter.enabled || inter.trigger?.type !== 'chat') continue;
+    const kw = (inter.trigger.chatKeyword || '').toLowerCase().trim();
+    if (kw && lowerComment.includes(kw)) {
+      triggerInteraction(inter, { user, comment });
+    }
+  }
+
+  // 4. Cek !play (Song Request)
   const playPrefixes = [config.commandPrefix || '!play', ...(config.commandAliases || ['!request', '!sr', '!lagu'])];
   let matchedPlay = null;
   for (const p of playPrefixes) {
@@ -328,7 +495,7 @@ async function processIncomingChatMessage(user, comment, isModerator = false) {
 }
 
 // ============================================================================
-// 3. KONEKSI TIKTOK LIVE REALTIME (v2.5.0 - ZERO COOKIE & ZERO KEY)
+// 6. KONEKSI TIKTOK LIVE REALTIME (v2.5.0 - ZERO COOKIE & ZERO KEY)
 // ============================================================================
 async function startTikTokMonitoring(username) {
   if (!username) return;
@@ -364,7 +531,6 @@ async function startTikTokMonitoring(username) {
       lastTikTokMessage = `Akun @${username} saat ini offline. Mulai LIVE di TikTok ya, sistem akan otomatis terhubung!`;
       console.log(`[TikTok] @${username} sedang offline. Menunggu siaran live dimulai...`);
 
-      // Polling setiap 8 detik jika belum live
       autoLiveWatcher = setInterval(async () => {
         if (tiktokConnected) return;
         try {
@@ -406,12 +572,84 @@ async function doConnectLive(conn, username) {
       if (state.roomInfo.owner.nickname) registerHostUsername(state.roomInfo.owner.nickname);
     }
 
+    // 1. Event Chat
     conn.on(WebcastEvent.CHAT, async data => {
       const user = data.user?.uniqueId || data.user?.nickname || 'Viewer';
       const comment = data.content?.trim() || '';
       const isModerator = !!(data.user?.userRole === 1 || data.user?.isOwner || isUserHost(user));
       console.log(`[TikTok Chat] @${user}: ${comment}`);
       await processIncomingChatMessage(user, comment, isModerator);
+    });
+
+    // 2. Event Gift (Pusat Interaksi)
+    conn.on(WebcastEvent.GIFT, data => {
+      const user = data.user?.uniqueId || data.user?.nickname || 'Viewer';
+      const giftName = data.giftName || data.giftDetails?.giftName || 'Gift';
+      const diamonds = data.diamondCount || 1;
+      const repeatCount = data.repeatCount || 1;
+      const avatar = data.user?.profilePictureUrls?.[0] || '';
+
+      console.log(`[TikTok Gift] 🎁 @${user} mengirim ${repeatCount}x ${giftName} (${diamonds} koin)`);
+
+      for (const inter of interactions) {
+        if (!inter.enabled || inter.trigger?.type !== 'gift') continue;
+        const reqGift = (inter.trigger.giftName || '').toLowerCase().trim();
+        const minCoins = inter.trigger.minCoins || 0;
+
+        const matchesName = !reqGift || reqGift === 'semua gift' || reqGift === 'any' || giftName.toLowerCase().includes(reqGift);
+        const matchesCoins = diamonds >= minCoins;
+
+        if (matchesName && matchesCoins) {
+          triggerInteraction(inter, { user, avatar, giftName, count: repeatCount, diamonds });
+        }
+      }
+    });
+
+    // 3. Event Like / Tap-tap Layar (Pusat Interaksi)
+    conn.on(WebcastEvent.LIKE, data => {
+      const user = data.user?.uniqueId || data.user?.nickname || 'Viewer';
+      const likeCount = data.likeCount || 1;
+      accumulatedLikes += likeCount;
+
+      for (const inter of interactions) {
+        if (!inter.enabled || inter.trigger?.type !== 'like') continue;
+        const targetLikes = inter.trigger.likeCount || 50;
+        if (accumulatedLikes >= targetLikes) {
+          accumulatedLikes = 0;
+          triggerInteraction(inter, { user, count: targetLikes });
+        }
+      }
+    });
+
+    // 4. Event Social (Follow & Share) (Pusat Interaksi)
+    conn.on(WebcastEvent.SOCIAL, data => {
+      const user = data.user?.uniqueId || data.user?.nickname || 'Viewer';
+      const displayType = String(data.displayType || '');
+      const isFollow = displayType.includes('follow');
+      const isShare = displayType.includes('share');
+
+      if (isFollow) {
+        console.log(`[TikTok Follow] 🌟 @${user} mulai mengikuti streamer!`);
+        for (const inter of interactions) {
+          if (!inter.enabled || inter.trigger?.type !== 'follow') continue;
+          triggerInteraction(inter, { user });
+        }
+      } else if (isShare) {
+        console.log(`[TikTok Share] 📢 @${user} membagikan siaran live!`);
+        for (const inter of interactions) {
+          if (!inter.enabled || inter.trigger?.type !== 'share') continue;
+          triggerInteraction(inter, { user });
+        }
+      }
+    });
+
+    // 5. Event Member Masuk
+    conn.on(WebcastEvent.MEMBER, data => {
+      const user = data.user?.uniqueId || data.user?.nickname || 'Viewer';
+      for (const inter of interactions) {
+        if (!inter.enabled || inter.trigger?.type !== 'join') continue;
+        triggerInteraction(inter, { user });
+      }
     });
 
     conn.on(WebcastEvent.STREAM_END, () => {
@@ -442,7 +680,7 @@ if (config.tiktokUsername && config.tiktokUsername !== 'ganti_dengan_username_ti
 }
 
 // ============================================================================
-// 4. HTTP SERVER & REST API (UNTUK OVERLAY & DASHBOARD)
+// 7. HTTP SERVER & REST API (UNTUK OVERLAY & DASHBOARD PUSAT INTERAKSI)
 // ============================================================================
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -458,8 +696,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 1. Halaman Overlay OBS (/overlay)
-  if (pathname === '/overlay') {
+  // 1. Halaman Overlay OBS (/overlay atau /overlay/alerts)
+  if (pathname === '/overlay' || pathname === '/overlay/alerts') {
     const filePath = path.join(__dirname, 'overlay.html');
     fs.readFile(filePath, (err, data) => {
       if (err) {
@@ -474,7 +712,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // 2. Halaman Dashboard Pengontrol Streamer (/control atau /)
-  if (pathname === '/control' || pathname === '/') {
+  if (pathname === '/control' || pathname === '/' || pathname === '/admin/pusat-interaksi') {
     const filePath = path.join(__dirname, 'control.html');
     fs.readFile(filePath, (err, data) => {
       if (err) {
@@ -516,7 +754,10 @@ const server = http.createServer(async (req, res) => {
       latestToast,
       latestToastMessage,
       skipVotesCount: skipVotes.size,
-      skipVotesNeeded: config.skipVotesNeeded || 2
+      skipVotesNeeded: config.skipVotesNeeded || 2,
+      masterSwitches: config.masterSwitches || {},
+      interactionsCount: interactions.length,
+      recentAlertLogs: recentAlertLogs.slice(0, 15)
     }));
     return;
   }
@@ -624,6 +865,197 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // 11. API Pusat Interaksi - Ambil Daftar Interaksi & Master Switches (/api/interactions)
+  if (pathname === '/api/interactions' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      interactions,
+      masterSwitches: config.masterSwitches || {},
+      recentAlertLogs: recentAlertLogs.slice(0, 30)
+    }));
+    return;
+  }
+
+  // 12. API Pusat Interaksi - Toggle Master Switch (/api/interactions/master-switch)
+  if (pathname === '/api/interactions/master-switch' && req.method === 'POST') {
+    try {
+      const data = await readJsonBody();
+      if (!config.masterSwitches) config.masterSwitches = {};
+      if (data.key && typeof data.value === 'boolean') {
+        config.masterSwitches[data.key] = data.value;
+        saveConfig();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, masterSwitches: config.masterSwitches }));
+        return;
+      }
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Key dan boolean value diperlukan' }));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 13. API Pusat Interaksi - Toggle Single Interaction On/Off (/api/interactions/toggle)
+  if (pathname === '/api/interactions/toggle' && req.method === 'POST') {
+    try {
+      const data = await readJsonBody();
+      const item = interactions.find(i => i.id === data.id);
+      if (item) {
+        item.enabled = !item.enabled;
+        saveInteractions();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, enabled: item.enabled, id: item.id }));
+        return;
+      }
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Interaksi tidak ditemukan' }));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 14. API Pusat Interaksi - Simpan / Buat Interaksi (/api/interactions/save)
+  if (pathname === '/api/interactions/save' && req.method === 'POST') {
+    try {
+      const data = await readJsonBody();
+      if (data.interaction) {
+        const idx = interactions.findIndex(i => i.id === data.interaction.id);
+        if (idx !== -1) {
+          interactions[idx] = { ...interactions[idx], ...data.interaction };
+        } else {
+          interactions.push({
+            id: 'act-' + Date.now(),
+            enabled: true,
+            ...data.interaction
+          });
+        }
+        saveInteractions();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, interactions }));
+        return;
+      }
+      if (Array.isArray(data.interactions)) {
+        interactions = data.interactions;
+        saveInteractions();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, interactions }));
+        return;
+      }
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Data interaksi tidak valid' }));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 15. API Pusat Interaksi - Hapus Interaksi (/api/interactions/delete)
+  if (pathname === '/api/interactions/delete' && req.method === 'POST') {
+    try {
+      const data = await readJsonBody();
+      const idx = interactions.findIndex(i => i.id === data.id);
+      if (idx !== -1) {
+        const removed = interactions.splice(idx, 1)[0];
+        saveInteractions();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, removed }));
+        return;
+      }
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Interaksi tidak ditemukan' }));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 16. API Pusat Interaksi - Uji Coba / Test Interaksi Langsung (/api/interactions/test)
+  if (pathname === '/api/interactions/test' && req.method === 'POST') {
+    try {
+      const data = await readJsonBody();
+      const item = interactions.find(i => i.id === data.id) || interactions[0];
+      if (item) {
+        const alert = triggerInteraction(item, {
+          user: data.user || 'Tester_Interaksi',
+          giftName: item.trigger?.giftName || 'Rose',
+          count: 1
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, alert }));
+        return;
+      }
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Tidak ada interaksi untuk dites' }));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 17. API Simulator Interaksi (/api/simulator/event)
+  if (pathname === '/api/simulator/event' && req.method === 'POST') {
+    try {
+      const data = await readJsonBody();
+      const user = data.user || 'Viewer_Simulasi';
+      const eventType = data.type || 'gift';
+
+      if (eventType === 'gift') {
+        const giftName = data.giftName || 'Rose';
+        const diamonds = data.diamonds || 1;
+        for (const inter of interactions) {
+          if (!inter.enabled || inter.trigger?.type !== 'gift') continue;
+          const reqGift = (inter.trigger.giftName || '').toLowerCase().trim();
+          if (!reqGift || reqGift === 'semua gift' || reqGift === 'any' || giftName.toLowerCase().includes(reqGift)) {
+            triggerInteraction(inter, { user, giftName, count: 1, diamonds });
+          }
+        }
+      } else if (eventType === 'like') {
+        for (const inter of interactions) {
+          if (!inter.enabled || inter.trigger?.type !== 'like') continue;
+          triggerInteraction(inter, { user, count: 50 });
+        }
+      } else if (eventType === 'follow') {
+        for (const inter of interactions) {
+          if (!inter.enabled || inter.trigger?.type !== 'follow') continue;
+          triggerInteraction(inter, { user });
+        }
+      } else if (eventType === 'share') {
+        for (const inter of interactions) {
+          if (!inter.enabled || inter.trigger?.type !== 'share') continue;
+          triggerInteraction(inter, { user });
+        }
+      } else if (eventType === 'chat') {
+        await processIncomingChatMessage(user, data.comment || '!jump');
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+    return;
+  }
+
+  // 18. API Alert Poll untuk Overlay OBS (/api/alerts/poll)
+  if (pathname === '/api/alerts/poll' && req.method === 'GET') {
+    const alertsToReturn = [...pendingAlerts];
+    pendingAlerts = []; // Kosongkan antrean setelah diambil oleh overlay
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      alerts: alertsToReturn,
+      masterSwitches: config.masterSwitches || {}
+    }));
+    return;
+  }
+
   // 404 Not Found
   res.writeHead(404, { 'Content-Type': 'text/plain' });
   res.end('Not Found');
@@ -632,9 +1064,10 @@ const server = http.createServer(async (req, res) => {
 const PORT = config.port || 3456;
 server.listen(PORT, () => {
   console.log('================================================================');
-  console.log(' 🎵 LIMUSIC TIKTOK LIVE REQUEST & VINYL OVERLAY SUITE');
+  console.log(' 🎵 AMBAFINITY - TIKTOK LIVE PUSAT INTERAKSI & OVERLAY SUITE');
   console.log('================================================================');
   console.log(` 🌐 Dashboard Kontrol : http://localhost:${PORT}/control`);
+  console.log(` ⚡ Pusat Interaksi   : http://localhost:${PORT}/admin/pusat-interaksi`);
   console.log(` 📺 OBS Browser Source: http://localhost:${PORT}/overlay`);
   console.log('================================================================');
   console.log(' Menunggu aktivitas dari live stream...');
